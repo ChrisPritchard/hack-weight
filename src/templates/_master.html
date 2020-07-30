@@ -1,0 +1,18 @@
+{{ define "master" }}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hack Weight</title>
+        <link type="text/css" rel="stylesheet" href="/static/site.css" />
+        <link rel="icon" type="image/png" href="/static/favicon.png" />
+    </head>
+    <body>
+
+        <div>
+            {{ template "content" .}}
+        </div>
+        
+        <script src="/static/site.js"></script>
+    </body>
+</html>
+{{ end }}

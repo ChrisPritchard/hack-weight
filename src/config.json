@@ -1,0 +1,8 @@
+{
+    "ListenURL": ":3000",
+    "IsDevelopment": true,
+    "VerboseErrors": false,
+    "EncryptionSecret": "thisisverysecret",
+    "DatabasePath": "./data.db",
+    "CookieAge": 60
+}
