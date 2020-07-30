@@ -191,9 +191,80 @@ func categoriesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func goalsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	if r.Method == "POST" {
+		setGoals(w, r)
+	} else if r.Method == "GET" {
+		getGoals(w, r)
+	} else {
+		http.NotFound(w, r)
+	}
+}
+
+func setGoals(w http.ResponseWriter, r *http.Request) {
+	weight := r.FormValue("target_weight")
+	if weight == "" {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	_, err := strconv.ParseFloat(weight, 32)
+	if err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	date := r.FormValue("target_date")
+	if date == "" {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	_, err = time.Parse(time.RFC3339, date)
+	if err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	err = setSetting("target_weight", weight)
+	if err == nil {
+		err = setSetting("target_date", date)
+	}
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func getGoals(w http.ResponseWriter, r *http.Request) {
+	settings, err := getSettings()
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	weight, exists := settings["target_weight"]
+	if !exists {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprintln(w, "hello world")
+
+	date, exists := settings["target_date"]
+	if !exists {
+		http.NotFound(w, r)
+		return
+	}
+
+	contentType := r.Header.Get("Content-type")
+	if contentType == "application/json" {
+		w.Header().Set("Content-Type", contentType)
+		result := struct{ TargetWeight, TargetDate string }{weight, date}
+		json.NewEncoder(w).Encode(result)
+	} else {
+		fmt.Fprintln(w, weight)
+		fmt.Fprintln(w, date)
+	}
 }

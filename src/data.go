@@ -43,9 +43,9 @@ func setSetting(key, val string) error {
 		UPDATE 
 			settings
 		SET
-			settings_value = ?
+			setting_value = ?
 		WHERE
-			settings_key = ?`, val, key)
+			setting_key = ?`, val, key)
 
 	if err != nil {
 		return err
