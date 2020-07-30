@@ -57,6 +57,7 @@ func setupRoutes() {
 	http.HandleFunc("/today/weight", weightHandler)
 	http.HandleFunc("/today/calories", caloriesHandler)
 	http.HandleFunc("/today", todayHandler)
+	http.HandleFunc("/categories", categoriesHandler)
 	http.HandleFunc("/goals", goalsHandler)
 }
 
@@ -101,7 +102,29 @@ func caloriesHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprintln(w, "hello world")
+
+	formValue := r.FormValue("amount")
+	if formValue == "" {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	calories, err := strconv.Atoi(formValue)
+	if err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	category := r.FormValue("category")
+
+	err = addCalorieEntry(int(calories), category)
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func todayHandler(w http.ResponseWriter, r *http.Request) {
@@ -110,6 +133,30 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintln(w, "hello world")
+}
+
+func categoriesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.NotFound(w, r)
+		return
+	}
+
+	categories, err := getCalorieCategories()
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	contentType := r.Header.Get("Content-type")
+	if contentType == "application/json" {
+		w.Header().Set("Content-Type", contentType)
+		json.NewEncoder(w).Encode(categories)
+	} else {
+		for _, category := range categories {
+			fmt.Fprintln(w, category)
+		}
+	}
 }
 
 func goalsHandler(w http.ResponseWriter, r *http.Request) {
