@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 type siteConfig struct {
@@ -132,7 +133,37 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprintln(w, "hello world")
+
+	day := time.Now()
+
+	weight, err := getDayWeight(day)
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	calories, err := getDayCalories(day)
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	contentType := r.Header.Get("Content-type")
+	if contentType == "application/json" {
+		w.Header().Set("Content-Type", contentType)
+		result := struct {
+			Weight   float32
+			Calories []calorieEntry
+		}{weight, calories}
+		json.NewEncoder(w).Encode(result)
+	} else {
+		fmt.Fprintln(w, weight)
+		for _, entry := range calories {
+			fmt.Fprintf(w, "%d %s\n", entry.Amount, entry.Category)
+		}
+	}
 }
 
 func categoriesHandler(w http.ResponseWriter, r *http.Request) {

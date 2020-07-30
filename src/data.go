@@ -122,39 +122,81 @@ func addCalorieEntry(amount int, category string) error {
 	return err
 }
 
-func getDayTotalCalories(day time.Time) (int, error) {
+func getDayStartAndEnd(day time.Time) (string, string) {
+	start := day.Truncate(24 * time.Hour)
+	endParam := start.Add(24 * time.Hour).Format(time.RFC3339)
+	return start.Format(time.RFC3339), endParam
+}
+
+func getDayWeight(day time.Time) (float32, error) {
 	database, err := sql.Open("sqlite3", config.DatabasePath)
 	defer database.Close()
 	if err != nil {
 		return 0, err
 	}
 
-	start := day.Truncate(24 * time.Hour)
-	endParam := start.Add(24 * time.Hour).Format(time.RFC3339)
-	startParam := start.Format(time.RFC3339)
+	start, end := getDayStartAndEnd(day)
+	var todaysWeight float32
+
+	row := database.QueryRow(`
+		SELECT 
+			weight
+		FROM 
+			weight_entry 
+		WHERE 
+			date >= ? 
+		AND 
+			date <= ?
+		ORDER BY
+			date DESC
+		LIMIT 1`, start, end)
+	err = row.Scan(&todaysWeight)
+
+	if err == sql.ErrNoRows {
+		return 0, nil
+	} else if err != nil {
+		return 0, err
+	} else {
+		return todaysWeight, nil
+	}
+}
+
+type calorieEntry struct {
+	Amount   int
+	Category string
+}
+
+func getDayCalories(day time.Time) ([]calorieEntry, error) {
+	database, err := sql.Open("sqlite3", config.DatabasePath)
+	defer database.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	start, end := getDayStartAndEnd(day)
 
 	rows, err := database.Query(`
 		SELECT 
-			amount 
+			amount, category 
 		FROM 
 			calorie_entry 
 		WHERE 
 			date >= ? 
 		AND 
-			date <= ?`, startParam, endParam)
+			date <= ?`, start, end)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	total := 0
+	result := make([]calorieEntry, 0)
 	for rows.Next() {
-		var val int
-		err = rows.Scan(&val)
+		var row calorieEntry
+		err = rows.Scan(&row.Amount, &row.Category)
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
-		total += val
+		result = append(result, row)
 	}
 
-	return total, nil
+	return result, nil
 }
