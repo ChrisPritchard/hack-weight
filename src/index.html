@@ -3,29 +3,34 @@
     <head>
         <title>Hack Weight</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <link rel="stylesheet" href="/static/paper.min.css" />
+        <link rel="stylesheet" href="/static/normalize.css" />
+        <link rel="stylesheet" href="/static/skeleton.css" />
         <link rel="stylesheet" href="/static/site.css" />
     </head>
     <body>
 
-        <div id="today-section" class="section">
-            <span id="today"></span>
-            <div>Weight</div>
-            <div id="recorded-weight"></div>
-            <button id="set-weight-button" class="hide">Set Weight</button>
-            <div>
-                <span id="total-consumed"></span>
-                <ul id="today-entries"></ul>
+        <div class="container">
+
+            <div id="today-section" class="section">
+                <h1 id="today"></h1>
+                <div>Weight</div>
+                <div id="recorded-weight"></div>
+                <button id="set-weight-button" class="hide">Set Weight</button>
+                <div>
+                    <span id="total-consumed"></span>
+                    <ul id="today-entries"></ul>
+                </div>
+                <button id="add-calorie-entry-button">Add Entry</button>
             </div>
-            <button id="add-calorie-entry-button">Add Entry</button>
-        </div>
 
-        <div id="set-weight-section" class="section hide">
-        
-        </div>
+            <div id="set-weight-section" class="section hide">
+            
+            </div>
 
-        <div id="add-calorie-entry-section" class="section hide">
-            <label>Categories<br/><select id="categories"></select>
+            <div id="add-calorie-entry-section" class="section hide">
+                <label>Categories<br/><select id="categories"></select>
+            </div>
+
         </div>
         
         <script type="text/javascript" src="/static/site.js"></script>
