@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hack Weight</title>
+        <style>
+            body {
+                font-family: 'Courier New';
+                font-weight: 'bold';
+                font-size: 1.2em;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Hello World</h1>
+        <label>Categories<br/><select id="categories"></select>
+        <script type="text/javascript">
+            var request = new XMLHttpRequest();
+            request.open('GET', '/categories', true);
+            request.setRequestHeader("Content-Type", "application/json");
+            request.onload = function() {
+                var resp = this.response;
+                var select = document.querySelector("#categories");
+                var categories = JSON.parse(resp)
+                for (var i = 0; i < categories.length; i++) {
+                    select.innerHTML += "<option>"+categories[i]+"</option>";
+                }
+            };
+            request.send();
+        </script>
+    </body>
+</html>

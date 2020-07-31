@@ -67,7 +67,14 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprintln(w, "hello world")
+	html, err := ioutil.ReadFile("./index.html")
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html")
+	w.Write(html)
 }
 
 func weightHandler(w http.ResponseWriter, r *http.Request) {
