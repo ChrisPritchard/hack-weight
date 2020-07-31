@@ -2,30 +2,15 @@
 <html>
     <head>
         <title>Hack Weight</title>
-        <style>
-            body {
-                font-family: 'Courier New';
-                font-weight: 'bold';
-                font-size: 1.2em;
-            }
-        </style>
+        <link rel="stylesheet" href="/static/site.css" />
     </head>
     <body>
         <h1>Hello World</h1>
+        <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas leo libero, condimentum non ante ut, lobortis vehicula tortor. Fusce ut neque elit. Ut vel ullamcorper ipsum, non scelerisque nunc. Suspendisse eget tellus non erat volutpat convallis. Curabitur ante nisl, tristique egestas orci id, accumsan cursus nibh. Curabitur egestas finibus lectus, eget tristique purus venenatis et. Vivamus at neque sed nulla mattis pellentesque. In eu eleifend tellus, et mattis sapien. </div>
+        <div>
         <label>Categories<br/><select id="categories"></select>
-        <script type="text/javascript">
-            var request = new XMLHttpRequest();
-            request.open('GET', '/categories', true);
-            request.setRequestHeader("Content-Type", "application/json");
-            request.onload = function() {
-                var resp = this.response;
-                var select = document.querySelector("#categories");
-                var categories = JSON.parse(resp)
-                for (var i = 0; i < categories.length; i++) {
-                    select.innerHTML += "<option>"+categories[i]+"</option>";
-                }
-            };
-            request.send();
-        </script>
+        </div>
+        <div> Integer sollicitudin bibendum eleifend. Vestibulum eget sem cursus, tincidunt quam sed, viverra nisl. Cras non tortor mi. Nunc ante lorem, ultrices quis velit eget, consequat congue diam. Nunc viverra nulla eget pretium pulvinar. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam eget finibus velit. Maecenas facilisis tellus purus, non efficitur justo rhoncus quis. </div>
+        <script type="text/javascript" src="/static/site.js"></script>
     </body>
 </html>

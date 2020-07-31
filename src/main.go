@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -54,12 +55,39 @@ func loadConfig() {
 
 func setupRoutes() {
 	http.HandleFunc("/", indexHandler) // note: this will catch any request not caught by the others
+	http.Handle("/static/", runtimeStaticHandler())
 
 	http.HandleFunc("/today/weight", weightHandler)
 	http.HandleFunc("/today/calories", caloriesHandler)
 	http.HandleFunc("/today", todayHandler)
 	http.HandleFunc("/categories", categoriesHandler)
 	http.HandleFunc("/goals", goalsHandler)
+}
+
+func runtimeStaticHandler() http.Handler {
+	server := http.FileServer(http.Dir("static"))
+	fileHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		setMimeType(w, r)
+		server.ServeHTTP(w, r)
+	})
+
+	return http.StripPrefix("/static/", fileHandler)
+}
+
+func setMimeType(w http.ResponseWriter, r *http.Request) {
+	headers := w.Header()
+	ext := filepath.Ext(r.URL.Path)
+
+	switch ext {
+	case ".css":
+		headers.Set("Content-Type", "text/css")
+	case ".js":
+		headers.Set("Content-Type", "application/javascript")
+	case ".png":
+		headers.Set("Content-Type", "image/png")
+	default:
+		return
+	}
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
