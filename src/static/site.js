@@ -16,3 +16,10 @@ getResponse("/categories", function(categories) {
         select.innerHTML += "<option>"+categories[i]+"</option>";
     }
 });
+
+function showTodaySection() {
+    today = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];
+    document.querySelector("#today").innerText = today;
+}
+
+showTodaySection();

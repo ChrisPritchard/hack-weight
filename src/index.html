@@ -2,15 +2,32 @@
 <html>
     <head>
         <title>Hack Weight</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="/static/paper.min.css" />
         <link rel="stylesheet" href="/static/site.css" />
     </head>
     <body>
-        <h1>Hello World</h1>
-        <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas leo libero, condimentum non ante ut, lobortis vehicula tortor. Fusce ut neque elit. Ut vel ullamcorper ipsum, non scelerisque nunc. Suspendisse eget tellus non erat volutpat convallis. Curabitur ante nisl, tristique egestas orci id, accumsan cursus nibh. Curabitur egestas finibus lectus, eget tristique purus venenatis et. Vivamus at neque sed nulla mattis pellentesque. In eu eleifend tellus, et mattis sapien. </div>
-        <div>
-        <label>Categories<br/><select id="categories"></select>
+
+        <div id="today-section" class="section">
+            <span id="today"></span>
+            <div>Weight</div>
+            <div id="recorded-weight"></div>
+            <button id="set-weight-button" class="hide">Set Weight</button>
+            <div>
+                <span id="total-consumed"></span>
+                <ul id="today-entries"></ul>
+            </div>
+            <button id="add-calorie-entry-button">Add Entry</button>
         </div>
-        <div> Integer sollicitudin bibendum eleifend. Vestibulum eget sem cursus, tincidunt quam sed, viverra nisl. Cras non tortor mi. Nunc ante lorem, ultrices quis velit eget, consequat congue diam. Nunc viverra nulla eget pretium pulvinar. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Aliquam eget finibus velit. Maecenas facilisis tellus purus, non efficitur justo rhoncus quis. </div>
+
+        <div id="set-weight-section" class="section hide">
+        
+        </div>
+
+        <div id="add-calorie-entry-section" class="section hide">
+            <label>Categories<br/><select id="categories"></select>
+        </div>
+        
         <script type="text/javascript" src="/static/site.js"></script>
     </body>
 </html>
