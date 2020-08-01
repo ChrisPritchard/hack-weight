@@ -34,12 +34,8 @@ document.querySelector("#show-set-weight").addEventListener("click", function() 
     changeSection("#set-weight-section");
 });
 
-document.querySelector("#show-set-weight").addEventListener("click", function() {
-    var sections = document.querySelectorAll(".section");
-    for(var i = 0; i < sections.length; i++) {
-        sections[i].classList.add('hide');
-    }
-    document.querySelector("#set-weight-section").classList.remove("hide");
+document.querySelector("#show-add-calorie-entry").addEventListener("click", function() {
+    showAddEntrySection();
 });
 
 document.querySelector("#set-weight").addEventListener("click", function() {
@@ -47,13 +43,6 @@ document.querySelector("#set-weight").addEventListener("click", function() {
     sendData("/today/weight", "weight="+weight, function() {
         showTodaySection();
     });
-});
-
-getResponse("/categories", function(categories) {
-    var select = document.querySelector("#categories");
-    for (var i = 0; i < categories.length; i++) {
-        select.innerHTML += "<option>"+categories[i]+"</option>";
-    }
 });
 
 function showTodaySection() {
@@ -69,7 +58,7 @@ function showTodaySection() {
     
         var totalConsumed = 0;
         var entries = document.querySelector("#today-entries");
-        for(var i = 0; i < today.Calories; i++) {
+        for(var i = 0; i < today.Calories.length; i++) {
             var entry = today.Calories[i];
             totalConsumed += entry.Amount;
             entries.innerHTML += "<li>"+entry.Amount+" Cal - "+entry.Category+"</li>";
@@ -79,5 +68,32 @@ function showTodaySection() {
         changeSection("#today-section");
     });
 }
+
+function showAddEntrySection() {
+    getResponse("/categories", function(categories) {
+        var select = document.querySelector("#existing-category-to-set");
+        select.innerHTML = "<option selected>(Select)</option>";
+        for (var i = 0; i < categories.length; i++) {
+            select.innerHTML += "<option>"+categories[i]+"</option>";
+        }
+        document.querySelector("#amount-to-set").value = 200;
+        document.querySelector("#new-category-to-set").value = "";
+
+        changeSection("#add-calorie-entry-section");
+    });
+}
+
+document.querySelector("#add-entry").addEventListener("click", function() {
+    var amount = document.querySelector("#amount-to-set").value;
+    var category = document.querySelector("#new-category-to-set").value;
+    if (category == "") {
+        category = document.querySelector("#existing-category-to-set").value;
+        if (category == "(Select)")
+            category = "";
+    }
+    sendData("/today/calories", "amount="+amount+"&category="+category, function() {
+        showTodaySection();
+    });
+});
 
 showTodaySection();

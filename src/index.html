@@ -19,7 +19,7 @@
                     <span id="total-consumed"></span>
                     <ul id="today-entries"></ul>
                 </div>
-                <button id="add-calorie-entry-button">Add Entry</button>
+                <button id="show-add-calorie-entry">Add Entry</button>
             </div>
 
             <div id="set-weight-section" class="section hide">
@@ -29,7 +29,19 @@
             </div>
 
             <div id="add-calorie-entry-section" class="section hide">
-                <label>Categories<br/><select id="categories"></select>
+                <h1>Enter Calories</h1>
+                <label>
+                    Calories<br/>
+                    <input id="amount-to-set" type="number" min="50" value="200" />
+                </label>
+                <br/>
+                <label>
+                    Category<br/>
+                    <input id="new-category-to-set" type="text" placeholder="New Category" /><br/>
+                    <select id="existing-category-to-set"></select>
+                </label>
+                <br/>
+                <button id="add-entry">Add Entry</button>
             </div>
 
         </div>
