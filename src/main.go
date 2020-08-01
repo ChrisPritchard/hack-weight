@@ -19,13 +19,15 @@ type siteConfig struct {
 
 var config = siteConfig{}
 
+var currentUser = ""
+
 func main() {
 	loadConfig()  // load settings from ./config.json and setup oauth config
 	setupRoutes() // configure handlers for url fragments
 
 	openingMessage := fmt.Sprintf("Application started! Listening locally at port %s", config.ListenURL)
 	log.Println(openingMessage)
-	log.Println(http.ListenAndServe(config.ListenURL, http.DefaultServeMux))
+	log.Println(http.ListenAndServe(config.ListenURL, globalHandler(http.DefaultServeMux)))
 }
 
 func loadConfig() {
@@ -46,6 +48,42 @@ func loadConfig() {
 	if verificationErrors != "" {
 		log.Fatal(verificationErrors)
 	}
+}
+
+func globalHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		user, pass, ok := r.BasicAuth()
+		valid, err := testAuthAgainstDB(user, pass)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if !ok || !valid {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Hack Weight Authentication"`)
+			w.WriteHeader(401)
+			w.Write([]byte("Unauthorised.\n"))
+			return
+		}
+
+		currentUser = user
+
+		headers := w.Header()
+		headers.Set("X-Frame-Options", "SAMEORIGIN")
+		headers.Set("X-XSS-Protection", "1; mode=block")
+		headers.Set("X-Content-Type-Options", "nosniff")
+
+		csp := "default-src 'none';"
+		csp += "script-src 'self' https://use.fontawesome.com;"
+		csp += "style-src 'self' https://use.fontawesome.com;"
+		csp += "font-src 'self' https://use.fontawesome.com;"
+		csp += "connect-src 'self';"
+		csp += "img-src 'self';"
+		csp += "frame-src 'self';"
+		headers.Set("Content-Security-Policy", csp)
+
+		h.ServeHTTP(w, r)
+	})
 }
 
 func setupRoutes() {

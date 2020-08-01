@@ -7,6 +7,27 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+func testAuthAgainstDB(user, pass string) (bool, error) {
+	database, err := sql.Open("sqlite3", config.DatabasePath)
+	defer database.Close()
+	if err != nil {
+		return false, err
+	}
+
+	var passwordHash string
+
+	row := database.QueryRow("SELECT password FROM users WHERE username = ?", user)
+	err = row.Scan(&passwordHash)
+
+	if err == sql.ErrNoRows {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	} else {
+		return compareWithArgonHash(pass, passwordHash)
+	}
+}
+
 func getSettings() (map[string]string, error) {
 	database, err := sql.Open("sqlite3", config.DatabasePath)
 	defer database.Close()
@@ -14,7 +35,7 @@ func getSettings() (map[string]string, error) {
 		return nil, err
 	}
 
-	rows, err := database.Query("SELECT setting_key, setting_value FROM settings")
+	rows, err := database.Query("SELECT setting_key, setting_value FROM settings WHERE username = ?", currentUser)
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +60,7 @@ func setSetting(key, val string) error {
 		return err
 	}
 
-	res, err := database.Exec(`
-		UPDATE 
-			settings
-		SET
-			setting_value = ?
-		WHERE
-			setting_key = ?`, val, key)
+	res, err := database.Exec("UPDATE settings SET setting_value = ? WHERE setting_key = ? AND username = ?", val, key, currentUser)
 
 	if err != nil {
 		return err
@@ -55,11 +70,7 @@ func setSetting(key, val string) error {
 		return err
 	}
 
-	_, err = database.Exec(`
-		INSERT INTO 
-			settings (setting_key, setting_value) 
-		VALUES 
-			(?, ?)`, key, val)
+	_, err = database.Exec("INSERT INTO settings (setting_key, setting_value, username) VALUES (?, ?, ?)", key, val, currentUser)
 	return err
 }
 
@@ -72,11 +83,7 @@ func addWeightEntry(val float32) error {
 
 	date := time.Now().Format(time.RFC3339)
 
-	_, err = database.Exec(`
-		INSERT INTO 
-			weight_entry (date, weight) 
-		VALUES 
-			(?, ?)`, date, val)
+	_, err = database.Exec("INSERT INTO weight_entry (date, weight, username) VALUES (?, ?, ?)", date, val, currentUser)
 	return err
 }
 
@@ -87,7 +94,7 @@ func getCalorieCategories() ([]string, error) {
 		return nil, err
 	}
 
-	rows, err := database.Query("SELECT DISTINCT category FROM calorie_entry")
+	rows, err := database.Query("SELECT DISTINCT category FROM calorie_entry WHERE username = ?", currentUser)
 	if err != nil {
 		return nil, err
 	}
@@ -114,11 +121,7 @@ func addCalorieEntry(amount int, category string) error {
 
 	date := time.Now().Format(time.RFC3339)
 
-	_, err = database.Exec(`
-		INSERT INTO 
-			calorie_entry (date, amount, category) 
-		VALUES 
-			(?, ?, ?)`, date, amount, category)
+	_, err = database.Exec("INSERT INTO calorie_entry (date, amount, category, username) VALUES (?, ?, ?, ?)", date, amount, category, currentUser)
 	return err
 }
 
@@ -138,18 +141,7 @@ func getDayWeight(day time.Time) (float32, error) {
 	start, end := getDayStartAndEnd(day)
 	var todaysWeight float32
 
-	row := database.QueryRow(`
-		SELECT 
-			weight
-		FROM 
-			weight_entry 
-		WHERE 
-			date >= ? 
-		AND 
-			date <= ?
-		ORDER BY
-			date DESC
-		LIMIT 1`, start, end)
+	row := database.QueryRow("SELECT weight	FROM weight_entry WHERE	date >= ? AND date <= ?	AND username = ? ORDER BY date DESC	LIMIT 1", start, end, currentUser)
 	err = row.Scan(&todaysWeight)
 
 	if err == sql.ErrNoRows {
@@ -175,15 +167,7 @@ func getDayCalories(day time.Time) ([]calorieEntry, error) {
 
 	start, end := getDayStartAndEnd(day)
 
-	rows, err := database.Query(`
-		SELECT 
-			amount, category 
-		FROM 
-			calorie_entry 
-		WHERE 
-			date >= ? 
-		AND 
-			date <= ?`, start, end)
+	rows, err := database.Query("SELECT amount, category FROM calorie_entry WHERE date >= ? AND date <= ? AND username = ?", start, end, currentUser)
 	if err != nil {
 		return nil, err
 	}
