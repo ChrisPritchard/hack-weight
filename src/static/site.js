@@ -1,7 +1,7 @@
 
 function getResponse(path, onResult) {
     var request = new XMLHttpRequest();
-    request.open('GET', '/categories', true);
+    request.open('GET', path, true);
     request.setRequestHeader("Content-Type", "application/json");
     request.onload = function() {
         var resp = this.response;
@@ -10,21 +10,43 @@ function getResponse(path, onResult) {
     request.send();
 }
 
-getResponse("/today", function(today) {
-    if (today.Weight && today.Weight != 0) {
-        document.querySelector("#recorded-weight").innerText == "Today's Weight: "+today.Weight + " KG";
-    } else {
-        document.querySelector("#set-weight-button").classList.remove("hide");
+function sendData(path, body, onSuccess) {
+    var request = new XMLHttpRequest();
+    request.open("POST", path, true);
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.onreadystatechange = function() { // Call a function when the state changes.
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 202) {
+            onSuccess();
+        }
     }
+    request.send(body);
+}
 
-    var totalConsumed = 0;
-    var entries = document.querySelector("#today-entries");
-    for(var i = 0; i < today.Calories; i++) {
-        var entry = today.Calories[i];
-        totalConsumed += entry.Amount;
-        entries.innerHTML += "<li>"+entry.Amount+" Cal - "+entry.Category+"</li>";
+function changeSection(newSectionSelector) {
+    var sections = document.querySelectorAll(".section");
+    for(var i = 0; i < sections.length; i++) {
+        sections[i].classList.add('hide');
     }
-    document.querySelector("#total-consumed").innerText = "Total Consumed Today: "+totalConsumed+" Cal";
+    document.querySelector(newSectionSelector).classList.remove("hide");
+}
+
+document.querySelector("#show-set-weight").addEventListener("click", function() {
+    changeSection("#set-weight-section");
+});
+
+document.querySelector("#show-set-weight").addEventListener("click", function() {
+    var sections = document.querySelectorAll(".section");
+    for(var i = 0; i < sections.length; i++) {
+        sections[i].classList.add('hide');
+    }
+    document.querySelector("#set-weight-section").classList.remove("hide");
+});
+
+document.querySelector("#set-weight").addEventListener("click", function() {
+    var weight = document.querySelector("#weight-to-set").value;
+    sendData("/today/weight", "weight="+weight, function() {
+        showTodaySection();
+    });
 });
 
 getResponse("/categories", function(categories) {
@@ -37,6 +59,25 @@ getResponse("/categories", function(categories) {
 function showTodaySection() {
     today = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];
     document.querySelector("#today").innerText = today;
+
+    getResponse("/today", function(today) {
+        if (today.Weight && today.Weight != 0) {
+            document.querySelector("#recorded-weight").innerText = "Today's Weight: "+today.Weight + " KG";
+        } else {
+            document.querySelector("#show-set-weight").classList.remove("hide");
+        }
+    
+        var totalConsumed = 0;
+        var entries = document.querySelector("#today-entries");
+        for(var i = 0; i < today.Calories; i++) {
+            var entry = today.Calories[i];
+            totalConsumed += entry.Amount;
+            entries.innerHTML += "<li>"+entry.Amount+" Cal - "+entry.Category+"</li>";
+        }
+        document.querySelector("#total-consumed").innerText = "Total Consumed Today: "+totalConsumed+" Cal";
+
+        changeSection("#today-section");
+    });
 }
 
 showTodaySection();

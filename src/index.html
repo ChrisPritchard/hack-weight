@@ -11,10 +11,10 @@
 
         <div class="container">
 
-            <div id="today-section" class="section">
+            <div id="today-section" class="section hide">
                 <h1 id="today"></h1>
-                <div id="recorded-weight"></div>
-                <button id="set-weight-button" class="hide">Set Weight</button>
+                <h2 id="recorded-weight"></h2>
+                <button id="show-set-weight" class="hide">Set Weight</button>
                 <div>
                     <span id="total-consumed"></span>
                     <ul id="today-entries"></ul>
@@ -23,7 +23,9 @@
             </div>
 
             <div id="set-weight-section" class="section hide">
-            
+                <h1>Enter Weight</h1>
+                <input id="weight-to-set" type="number" step="0.1" min="50" max="150" value="90" />
+                <button id="set-weight">Submit</button>
             </div>
 
             <div id="add-calorie-entry-section" class="section hide">
