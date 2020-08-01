@@ -13,10 +13,8 @@ import (
 )
 
 type siteConfig struct {
-	DatabasePath  string
-	ListenURL     string
-	VerboseErrors bool
-	IsDevelopment bool
+	DatabasePath string
+	ListenURL    string
 }
 
 var config = siteConfig{}
@@ -26,9 +24,6 @@ func main() {
 	setupRoutes() // configure handlers for url fragments
 
 	openingMessage := fmt.Sprintf("Application started! Listening locally at port %s", config.ListenURL)
-	if config.IsDevelopment {
-		openingMessage += " and running in DEVELOPMENT mode"
-	}
 	log.Println(openingMessage)
 	log.Println(http.ListenAndServe(config.ListenURL, http.DefaultServeMux))
 }
