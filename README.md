@@ -9,6 +9,7 @@ Hack Weight uses a SQLite3 database, that can be created with the following SQL:
 ```sql
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
+CREATE TABLE users ( username string primary key, password string not null );
 CREATE TABLE settings ( setting_key string primary key, setting_value string not null );
 CREATE TABLE weight_entry ( id integer primary key, date string not null, weight real not null );
 CREATE TABLE calorie_entry ( id integer primary key, date string not null, amount integer not null, category string not null );
