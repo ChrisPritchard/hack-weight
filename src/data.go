@@ -7,6 +7,39 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+var passwordConfig = &argon2Config{
+	time:    1,
+	memory:  64 * 1024,
+	threads: 4,
+	keyLen:  32,
+}
+
+func insertOrUpdateUser(user, pass string) error {
+	passwordHash, err := generateArgonHash(passwordConfig, pass)
+	if err != nil {
+		return err
+	}
+
+	database, err := sql.Open("sqlite3", config.DatabasePath)
+	defer database.Close()
+	if err != nil {
+		return err
+	}
+
+	res, err := database.Exec("UPDATE users SET password = ? WHERE username = ?", passwordHash, user)
+
+	if err != nil {
+		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil || rows == 1 {
+		return err
+	}
+
+	_, err = database.Exec("INSERT INTO users (username, password) VALUES (?, ?)", user, passwordHash)
+	return err
+}
+
 func testAuthAgainstDB(user, pass string) (bool, error) {
 	database, err := sql.Open("sqlite3", config.DatabasePath)
 	defer database.Close()

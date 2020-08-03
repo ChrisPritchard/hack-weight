@@ -22,6 +22,14 @@ var config = siteConfig{}
 var currentUser = ""
 
 func main() {
+	if len(os.Args) == 4 && os.Args[1] == "--create-user" {
+		err := insertOrUpdateUser(os.Args[2], os.Args[3])
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	loadConfig()  // load settings from ./config.json and setup oauth config
 	setupRoutes() // configure handlers for url fragments
 
