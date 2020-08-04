@@ -10,6 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/src",
+            // "args": ["--create-user","chris","test"]
         }
     ]
 }

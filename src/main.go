@@ -22,15 +22,18 @@ var config = siteConfig{}
 var currentUser = ""
 
 func main() {
+
+	loadConfig() // load settings from ./config.json and setup oauth config
+
 	if len(os.Args) == 4 && os.Args[1] == "--create-user" {
 		err := insertOrUpdateUser(os.Args[2], os.Args[3])
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Println("user created or updated successfully")
 		return
 	}
 
-	loadConfig()  // load settings from ./config.json and setup oauth config
 	setupRoutes() // configure handlers for url fragments
 
 	openingMessage := fmt.Sprintf("Application started! Listening locally at port %s", config.ListenURL)
