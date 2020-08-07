@@ -14,6 +14,7 @@
             <div id="today-section" class="section hide">
                 <h1 id="today"></h1>
                 <h2 id="recorded-weight"></h2>
+                <button id="show-set-goals">Show Goals</button>
                 <button id="show-set-weight" class="hide">Set Weight</button>
                 <div>
                     <span id="total-consumed"></span>
@@ -42,6 +43,33 @@
                 </label>
                 <br/>
                 <button id="add-entry">Add Entry</button>
+            </div>
+
+            <div id="set-goals-section" class="section hide">
+                <h1>Goals</h1>
+                <label>
+                    Current Weight<br/>
+                    <input id="current-weight" type="number" step="0.1" min="50" max="150" value="90" />
+                </label>
+                <label>
+                    Target Weight<br/>
+                    <input id="target-weight" type="number" step="0.1" min="50" max="150" value="90" />
+                </label>
+                <label>
+                    Target Date<br/>
+                    <input id="target-date" type="date" />
+                </label>
+                <label>
+                    Daily Burn Rate<br/>
+                    <input id="daily-burn-rate" type="number" step="1" min="1600" max="3000" value="2400" /><br/>
+                    Its usually around 2400 for men, and 2200 for woman, on average.
+                </label>
+                <div id="goals-description">
+                    By setting these values, a daily calorie max can be calculated. Sticking below that max over the timespan to your target date, will result in achieving the target weight.
+                    <br />
+                    Don't be too aggressive - aim for a week per KG, so if you want to lose 20KG, aim for a goal date four to five months ahead.
+                </div>
+                <button id="set-goals">Submit</button>
             </div>
 
         </div>

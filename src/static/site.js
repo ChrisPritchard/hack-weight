@@ -34,6 +34,10 @@ document.querySelector("#show-set-weight").addEventListener("click", function() 
     changeSection("#set-weight-section");
 });
 
+document.querySelector("#show-set-goals").addEventListener("click", function() {
+    changeSection("#set-goals-section");
+});
+
 document.querySelector("#show-add-calorie-entry").addEventListener("click", function() {
     showAddEntrySection();
 });
