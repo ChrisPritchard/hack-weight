@@ -35,7 +35,7 @@ document.querySelector("#show-set-weight").addEventListener("click", function() 
 });
 
 document.querySelector("#show-set-goals").addEventListener("click", function() {
-    changeSection("#set-goals-section");
+    showGoalsSection();
 });
 
 document.querySelector("#show-add-calorie-entry").addEventListener("click", function() {
@@ -49,6 +49,52 @@ document.querySelector("#set-weight").addEventListener("click", function() {
     });
 });
 
+var goalsElems = {
+    currentWeight: document.querySelector("#current-weight"),
+    targetWeight: document.querySelector("#target-weight"),
+    targetDate: document.querySelector("#target-date"),
+    dailyBurnRate: document.querySelector("#daily-burn-rate"),
+};
+goalsElems.currentWeight.addEventListener("change", function() { calculateRates(); });
+goalsElems.targetWeight.addEventListener("change", function() { calculateRates(); });
+goalsElems.targetDate.addEventListener("change", function() { calculateRates(); });
+goalsElems.dailyBurnRate.addEventListener("change", function() { calculateRates(); });
+
+function calculateRates() {
+    document.querySelector("#goals-description").value = "";
+    document.querySelector("#set-goals").setAttribute("disabled", "disabled");
+
+    if (!goalsElems.dailyBurnRate.value) {
+        return;
+    }
+    var days = (Date.parse(goalsElems.targetDate.value) - (new Date()).getTime()) / (1000 * 3600 * 24);
+    if(isNaN(days))
+        return;
+
+    var calsPerKG = 7700;
+    var toLose = goalsElems.currentWeight.value - goalsElems.targetWeight.value;
+    var deficitPerDay = (toLose * calsPerKG) / days;
+    var target = goalsElems.dailyBurnRate.value - deficitPerDay;
+    if (isNaN(target) || target < 500)
+        return;
+
+    document.querySelector("#goals-description").innerText = Math.round(target)+" calories per day to meet goal";
+    document.querySelector("#set-goals").removeAttribute("disabled");
+}
+
+document.querySelector("#add-entry").addEventListener("click", function() {
+    var amount = document.querySelector("#amount-to-set").value;
+    var category = document.querySelector("#new-category-to-set").value;
+    if (category == "") {
+        category = document.querySelector("#existing-category-to-set").value;
+        if (category == "(Select)")
+            category = "";
+    }
+    sendData("/today/calories", "amount="+amount+"&category="+category, function() {
+        showTodaySection();
+    });
+});
+
 function showTodaySection() {
     today = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];
     document.querySelector("#today").innerText = today;
@@ -56,12 +102,14 @@ function showTodaySection() {
     getResponse("/today", function(today) {
         if (today.Weight && today.Weight != 0) {
             document.querySelector("#recorded-weight").innerText = "Today's Weight: "+today.Weight + " KG";
+            document.querySelector("#current-weight").value = today.Weight;
         } else {
             document.querySelector("#show-set-weight").classList.remove("hide");
         }
     
         if (today.LastWeight && today.LastWeight != 0) {
             document.querySelector("#weight-to-set").value = today.LastWeight;
+            document.querySelector("#current-weight").value = today.LastWeight;
         }
 
         var totalConsumed = 0;
@@ -91,17 +139,22 @@ function showAddEntrySection() {
     });
 }
 
-document.querySelector("#add-entry").addEventListener("click", function() {
-    var amount = document.querySelector("#amount-to-set").value;
-    var category = document.querySelector("#new-category-to-set").value;
-    if (category == "") {
-        category = document.querySelector("#existing-category-to-set").value;
-        if (category == "(Select)")
-            category = "";
-    }
-    sendData("/today/calories", "amount="+amount+"&category="+category, function() {
-        showTodaySection();
+function showGoalsSection() {
+    getResponse("/goals", function(goals) {
+        if (goals.TargetWeight && goals.TargetWeight != 0) {
+            document.querySelector("#target-weight").value = goals.TargetWeight;
+        }
+    
+        if (goals.Date) {
+            document.querySelector("#target-date").value = goals.Date;
+        }
+
+        if (goals.BurnRate && goals.BurnRate != 0) {
+            document.querySelector("#daily-burn-rate").value = goals.BurnRate;
+        }
+
+        changeSection("#set-goals-section");
     });
-});
+}
 
 showTodaySection();

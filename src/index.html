@@ -3,8 +3,6 @@
     <head>
         <title>Hack Weight</title>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-        <link rel="stylesheet" href="/static/normalize.css" />
-        <link rel="stylesheet" href="/static/skeleton.css" />
         <link rel="stylesheet" href="/static/site.css" />
     </head>
     <body>
@@ -64,12 +62,8 @@
                     <input id="daily-burn-rate" type="number" step="1" min="1600" max="3000" value="2400" /><br/>
                     Its usually around 2400 for men, and 2200 for woman, on average.
                 </label>
-                <div id="goals-description">
-                    By setting these values, a daily calorie max can be calculated. Sticking below that max over the timespan to your target date, will result in achieving the target weight.
-                    <br />
-                    Don't be too aggressive - aim for a week per KG, so if you want to lose 20KG, aim for a goal date four to five months ahead.
-                </div>
-                <button id="set-goals">Submit</button>
+                <div id="goals-description"></div>
+                <button id="set-goals" disabled>Submit</button>
             </div>
 
         </div>

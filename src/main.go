@@ -222,7 +222,7 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var lastWeight float32 = 0
+	var lastWeight float32
 	if weight == 0 {
 		lastWeight, err = getLatestWeight()
 		if err != nil {
@@ -336,25 +336,32 @@ func getGoals(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	weight, exists := settings["target_weight"]
-	if !exists {
-		http.NotFound(w, r)
-		return
+	var targetWeight float64
+	weightVal, exists := settings["target_weight"]
+	if exists {
+		targetWeight, _ = strconv.ParseFloat(weightVal, 32)
 	}
 
-	date, exists := settings["target_date"]
-	if !exists {
-		http.NotFound(w, r)
-		return
+	date, _ := settings["target_date"]
+
+	burnRate := 0
+	burnRateVal, exists := settings["burn_rate"]
+	if exists {
+		burnRate, _ = strconv.Atoi(burnRateVal)
 	}
 
 	contentType := r.Header.Get("Content-type")
 	if contentType == "application/json" {
 		w.Header().Set("Content-Type", contentType)
-		result := struct{ TargetWeight, TargetDate string }{weight, date}
+		result := struct {
+			TargetWeight float64
+			TargetDate   string
+			BurnRate     int
+		}{targetWeight, date, burnRate}
 		json.NewEncoder(w).Encode(result)
 	} else {
-		fmt.Fprintln(w, weight)
+		fmt.Fprintln(w, targetWeight)
 		fmt.Fprintln(w, date)
+		fmt.Fprintln(w, burnRate)
 	}
 }
