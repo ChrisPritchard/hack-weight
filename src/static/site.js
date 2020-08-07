@@ -82,6 +82,15 @@ function calculateRates() {
     document.querySelector("#set-goals").removeAttribute("disabled");
 }
 
+document.querySelector("#set-goals").addEventListener("click", function() {
+    var data = "target_weight=" + goalsElems.targetWeight.value;
+    data += "&target_date=" + goalsElems.targetDate.value;
+    data += "&daily_burn_rate=" + goalsElems.dailyBurnRate.value;
+    sendData("/goals", data, function() {
+        showTodaySection();
+    });
+});
+
 document.querySelector("#add-entry").addEventListener("click", function() {
     var amount = document.querySelector("#amount-to-set").value;
     var category = document.querySelector("#new-category-to-set").value;

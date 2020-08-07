@@ -309,7 +309,19 @@ func setGoals(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = time.Parse(time.RFC3339, date)
+	_, err = time.Parse("2006-01-02", date)
+	if err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	burnRate := r.FormValue("daily_burn_rate")
+	if burnRate == "" {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	_, err = strconv.Atoi(burnRate)
 	if err != nil {
 		http.Error(w, "bad request", 400)
 		return
@@ -318,6 +330,9 @@ func setGoals(w http.ResponseWriter, r *http.Request) {
 	err = setSetting("target_weight", weight)
 	if err == nil {
 		err = setSetting("target_date", date)
+		if err == nil {
+			err = setSetting("daily_burn_rate", date)
+		}
 	}
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
@@ -345,7 +360,7 @@ func getGoals(w http.ResponseWriter, r *http.Request) {
 	date, _ := settings["target_date"]
 
 	burnRate := 0
-	burnRateVal, exists := settings["burn_rate"]
+	burnRateVal, exists := settings["daily_burn_rate"]
 	if exists {
 		burnRate, _ = strconv.Atoi(burnRateVal)
 	}
