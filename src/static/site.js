@@ -56,6 +56,10 @@ function showTodaySection() {
             document.querySelector("#show-set-weight").classList.remove("hide");
         }
     
+        if (today.LastWeight && today.LastWeight != 0) {
+            document.querySelector("#weight-to-set").value = today.LastWeight;
+        }
+
         var totalConsumed = 0;
         var entries = document.querySelector("#today-entries");
         for(var i = 0; i < today.Calories.length; i++) {

@@ -186,6 +186,27 @@ func getDayWeight(day time.Time) (float32, error) {
 	}
 }
 
+func getLatestWeight() (float32, error) {
+	database, err := sql.Open("sqlite3", config.DatabasePath)
+	defer database.Close()
+	if err != nil {
+		return 0, err
+	}
+
+	var lastWeight float32
+
+	row := database.QueryRow("SELECT weight	FROM weight_entry WHERE username = ? ORDER BY date DESC LIMIT 1", currentUser)
+	err = row.Scan(&lastWeight)
+
+	if err == sql.ErrNoRows {
+		return 0, nil
+	} else if err != nil {
+		return 0, err
+	} else {
+		return lastWeight, nil
+	}
+}
+
 type calorieEntry struct {
 	Amount   int
 	Category string
