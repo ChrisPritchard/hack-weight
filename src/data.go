@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"strconv"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -107,7 +108,42 @@ func setSetting(key, val string) error {
 	return err
 }
 
-func addWeightEntry(val float32) error {
+type goals struct {
+	TargetWeight float64
+	TargetDate   string
+	BurnRate     int
+}
+
+func getGoals() (*goals, error) {
+	settings, err := getSettings()
+	if err != nil {
+		return nil, err
+	}
+
+	var targetWeight float64
+	weightVal, exists := settings["target_weight"]
+	if exists {
+		targetWeight, err = strconv.ParseFloat(weightVal, 32)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	date, _ := settings["target_date"]
+
+	burnRate := 0
+	burnRateVal, exists := settings["daily_burn_rate"]
+	if exists {
+		burnRate, err = strconv.Atoi(burnRateVal)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &goals{targetWeight, date, burnRate}, nil
+}
+
+func addWeightEntry(val float64) error {
 	database, err := sql.Open("sqlite3", config.DatabasePath)
 	defer database.Close()
 	if err != nil {
@@ -164,7 +200,7 @@ func getDayStartAndEnd(day time.Time) (string, string) {
 	return start.Format(time.RFC3339), endParam
 }
 
-func getDayWeight(day time.Time) (float32, error) {
+func getDayWeight(day time.Time) (float64, error) {
 	database, err := sql.Open("sqlite3", config.DatabasePath)
 	defer database.Close()
 	if err != nil {
@@ -172,7 +208,7 @@ func getDayWeight(day time.Time) (float32, error) {
 	}
 
 	start, end := getDayStartAndEnd(day)
-	var todaysWeight float32
+	var todaysWeight float64
 
 	row := database.QueryRow("SELECT weight	FROM weight_entry WHERE	date >= ? AND date <= ?	AND username = ? ORDER BY date DESC	LIMIT 1", start, end, currentUser)
 	err = row.Scan(&todaysWeight)
@@ -186,14 +222,14 @@ func getDayWeight(day time.Time) (float32, error) {
 	}
 }
 
-func getLatestWeight() (float32, error) {
+func getLatestWeight() (float64, error) {
 	database, err := sql.Open("sqlite3", config.DatabasePath)
 	defer database.Close()
 	if err != nil {
 		return 0, err
 	}
 
-	var lastWeight float32
+	var lastWeight float64
 
 	row := database.QueryRow("SELECT weight	FROM weight_entry WHERE username = ? ORDER BY date DESC LIMIT 1", currentUser)
 	err = row.Scan(&lastWeight)
