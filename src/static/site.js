@@ -42,6 +42,13 @@ document.querySelector("#show-add-calorie-entry").addEventListener("click", func
     showAddEntrySection();
 });
 
+var cancelElems = document.querySelectorAll(".cancel-button");
+for (var i = 0; i < cancelElems.length; i++) {
+    cancelElems[i].addEventListener("click", function() {
+        changeSection("#today-section");
+    });
+}
+
 document.querySelector("#set-weight").addEventListener("click", function() {
     var weight = document.querySelector("#weight-to-set").value;
     sendData("/today/weight", "weight="+weight, function() {
@@ -110,7 +117,8 @@ function showTodaySection() {
 
     getResponse("/today", function(today) {
         if (today.Weight && today.Weight != 0) {
-            document.querySelector("#recorded-weight").innerText = "Today's Weight: "+today.Weight + " KG";
+            weightText = (Math.round(today.Weight * 10)/10).toFixed(1)
+            document.querySelector("#recorded-weight").innerText = "Today's Weight: "+weightText+" KG";
             document.querySelector("#current-weight").value = today.Weight;
         } else {
             document.querySelector("#show-set-weight").classList.remove("hide");
@@ -129,6 +137,10 @@ function showTodaySection() {
             entries.innerHTML += "<li>"+entry.Amount+" Cal - "+entry.Category+"</li>";
         }
         document.querySelector("#total-consumed").innerText = "Total Consumed Today: "+totalConsumed+" Cal";
+
+        if (today.TodayMax && today.TodayMax > 0) {
+            document.querySelector("#total-consumed").innerText += " / " + today.TodayMax + " Cal";
+        }
 
         changeSection("#today-section");
     });

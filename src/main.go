@@ -168,7 +168,7 @@ func weightHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = addWeightEntry(float32(val))
+	err = addWeightEntry(val)
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)
@@ -223,7 +223,7 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var lastWeight float32
+	var lastWeight float64
 	if weight == 0 {
 		lastWeight, err = getLatestWeight()
 		if err != nil {
@@ -240,14 +240,29 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	goals, err := getGoals()
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	var todayMax *int
+	if weight != 0 {
+		todayMax = calcTodayMax(*goals, weight)
+	} else if lastWeight != 0 {
+		todayMax = calcTodayMax(*goals, lastWeight)
+	}
+
 	contentType := r.Header.Get("Content-type")
 	if contentType == "application/json" {
 		w.Header().Set("Content-Type", contentType)
 		result := struct {
-			Weight     float32
-			LastWeight float32
+			Weight     float64
+			LastWeight float64
 			Calories   []calorieEntry
-		}{weight, lastWeight, calories}
+			TodayMax   *int
+		}{weight, lastWeight, calories, todayMax}
 		json.NewEncoder(w).Encode(result)
 	} else {
 		fmt.Fprintln(w, weight)
@@ -255,6 +270,23 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "%d %s\n", entry.Amount, entry.Category)
 		}
 	}
+}
+
+func calcTodayMax(goals goals, currentWeight float64) *int {
+	if goals.TargetDate == "" || goals.TargetWeight == 0 || goals.TargetWeight >= currentWeight || goals.BurnRate == 0 {
+		return nil
+	}
+	date, err := time.Parse("2006-01-02", goals.TargetDate)
+	if err != nil {
+		return nil
+	}
+	days := date.Sub(time.Now()).Hours() / 24
+	amount := (currentWeight - goals.TargetWeight) * 7700 // 7700 is cals per kg, roughly
+	result := int(float64(goals.BurnRate) - (amount / days))
+	if result < 0 {
+		return nil
+	}
+	return &result
 }
 
 func categoriesHandler(w http.ResponseWriter, r *http.Request) {
@@ -283,15 +315,15 @@ func categoriesHandler(w http.ResponseWriter, r *http.Request) {
 
 func goalsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-		setGoals(w, r)
+		setGoalsHandler(w, r)
 	} else if r.Method == "GET" {
-		getGoals(w, r)
+		getGoalsHandler(w, r)
 	} else {
 		http.NotFound(w, r)
 	}
 }
 
-func setGoals(w http.ResponseWriter, r *http.Request) {
+func setGoalsHandler(w http.ResponseWriter, r *http.Request) {
 	weight := r.FormValue("target_weight")
 	if weight == "" {
 		http.Error(w, "bad request", 400)
@@ -332,7 +364,7 @@ func setGoals(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		err = setSetting("target_date", date)
 		if err == nil {
-			err = setSetting("daily_burn_rate", date)
+			err = setSetting("daily_burn_rate", burnRate)
 		}
 	}
 	if err != nil {
@@ -344,41 +376,22 @@ func setGoals(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func getGoals(w http.ResponseWriter, r *http.Request) {
-	settings, err := getSettings()
+func getGoalsHandler(w http.ResponseWriter, r *http.Request) {
+	goals, err := getGoals()
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)
 		return
 	}
 
-	var targetWeight float64
-	weightVal, exists := settings["target_weight"]
-	if exists {
-		targetWeight, _ = strconv.ParseFloat(weightVal, 32)
-	}
-
-	date, _ := settings["target_date"]
-
-	burnRate := 0
-	burnRateVal, exists := settings["daily_burn_rate"]
-	if exists {
-		burnRate, _ = strconv.Atoi(burnRateVal)
-	}
-
 	contentType := r.Header.Get("Content-type")
 	if contentType == "application/json" {
 		w.Header().Set("Content-Type", contentType)
-		result := struct {
-			TargetWeight float64
-			TargetDate   string
-			BurnRate     int
-		}{targetWeight, date, burnRate}
-		json.NewEncoder(w).Encode(result)
+		json.NewEncoder(w).Encode(goals)
 	} else {
-		fmt.Fprintln(w, targetWeight)
-		fmt.Fprintln(w, date)
-		fmt.Fprintln(w, burnRate)
+		fmt.Fprintln(w, goals.TargetWeight)
+		fmt.Fprintln(w, goals.TargetDate)
+		fmt.Fprintln(w, goals.BurnRate)
 	}
 }
 
