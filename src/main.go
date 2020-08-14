@@ -106,6 +106,7 @@ func setupRoutes() {
 	http.HandleFunc("/today", todayHandler)
 	http.HandleFunc("/categories", categoriesHandler)
 	http.HandleFunc("/goals", goalsHandler)
+	// http.HandleFunc("/history", historyHandler)
 }
 
 func runtimeStaticHandler() http.Handler {
@@ -380,3 +381,29 @@ func getGoals(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, burnRate)
 	}
 }
+
+// func historyHandler(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method != "GET" {
+// 		http.NotFound(w, r)
+// 	}
+
+// 	// get all recorded weights, by day
+// 	// get all recorded entries, group by day
+// 	// put into a map of day -> weight, entries
+// 	// create list of rows with entries properly grouped
+
+// 	contentType := r.Header.Get("Content-type")
+// 	if contentType == "application/json" {
+// 		w.Header().Set("Content-Type", contentType)
+// 		result := struct {
+// 			TargetWeight float64
+// 			TargetDate   string
+// 			BurnRate     int
+// 		}{targetWeight, date, burnRate}
+// 		json.NewEncoder(w).Encode(result)
+// 	} else {
+// 		fmt.Fprintln(w, targetWeight)
+// 		fmt.Fprintln(w, date)
+// 		fmt.Fprintln(w, burnRate)
+// 	}
+// }
