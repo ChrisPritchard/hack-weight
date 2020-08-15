@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -168,7 +169,9 @@ func weightHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = addWeightEntry(val)
+	rounded := math.Round(val*100) / 100
+
+	err = addWeightEntry(rounded)
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)
