@@ -1,0 +1,14 @@
+[Unit]
+Description=Hack-Weight Website
+
+[Service]
+WorkingDirectory=/var/www/hack-weight
+ExecStart=/var/www/hack-weight/hack-weight.so
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=-hack-weight-web
+User=www-data
+
+[Install]
+WantedBy=multi-user.target
