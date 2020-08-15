@@ -136,7 +136,7 @@ function showTodaySection() {
             totalConsumed += entry.Amount;
             entries.innerHTML += "<li>"+entry.Amount+" Cal - "+entry.Category+"</li>";
         }
-        document.querySelector("#total-consumed").innerText = "Total Consumed Today: "+totalConsumed+" Cal";
+        document.querySelector("#total-consumed").innerText = "Consumed Today: "+totalConsumed+" Cal";
 
         if (today.TodayMax && today.TodayMax > 0) {
             document.querySelector("#total-consumed").innerText += " / " + today.TodayMax + " Cal";
