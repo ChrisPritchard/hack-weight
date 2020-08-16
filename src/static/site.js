@@ -169,8 +169,8 @@ function showGoalsSection(dontSwitch) {
             document.querySelector("#target-weight").value = goals.TargetWeight;
         }
     
-        if (goals.Date) {
-            document.querySelector("#target-date").value = goals.Date;
+        if (goals.TargetDate) {
+            document.querySelector("#target-date").value = goals.TargetDate;
         }
 
         if (goals.BurnRate && goals.BurnRate != 0) {
