@@ -67,6 +67,19 @@ goalsElems.targetWeight.addEventListener("change", function() { calculateRates()
 goalsElems.targetDate.addEventListener("change", function() { calculateRates(); });
 goalsElems.dailyBurnRate.addEventListener("change", function() { calculateRates(); });
 
+document.querySelector("#clear-history").addEventListener("click", function() {
+    if(confirm("Are you sure? This is irreversable")) {
+        sendData("/history/clear", null, function() {
+            goalsElems.currentWeight.value = "";
+            goalsElems.targetWeight.value = "";
+            goalsElems.targetDate.value = "";
+            goalsElems.dailyBurnRate.value = "";
+            document.querySelector("#weight-to-set").value = "";
+            showTodaySection();
+        });
+    }
+});
+
 function calculateRates() {
     document.querySelector("#goals-description").value = "";
     document.querySelector("#set-goals").setAttribute("disabled", "disabled");

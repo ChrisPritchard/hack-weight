@@ -213,3 +213,19 @@ func getDayCalories(day time.Time, username string) ([]calorieEntry, error) {
 
 	return result, nil
 }
+
+func clearAllEntries(username string) error {
+	_, err := database.Exec("delete from settings WHERE username = ?", username)
+	if err != nil {
+		return err
+	}
+	_, err = database.Exec("delete from weight_entry WHERE username = ?", username)
+	if err != nil {
+		return err
+	}
+	_, err = database.Exec("delete from calorie_entry WHERE username = ?", username)
+	if err != nil {
+		return err
+	}
+	return nil
+}

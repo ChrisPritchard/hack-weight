@@ -113,6 +113,7 @@ func setupRoutes() {
 	http.HandleFunc("/today", todayHandler)
 	http.HandleFunc("/categories", categoriesHandler)
 	http.HandleFunc("/goals", goalsHandler)
+	http.HandleFunc("/history/clear", clearAllEntriesHandler)
 }
 
 func runtimeStaticHandler() http.Handler {

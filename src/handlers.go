@@ -278,3 +278,19 @@ func getGoalsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, goals.BurnRate)
 	}
 }
+
+func clearAllEntriesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+		return
+	}
+
+	err := clearAllEntries(currentUser(r))
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
