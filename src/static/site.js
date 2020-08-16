@@ -106,6 +106,10 @@ document.querySelector("#add-entry").addEventListener("click", function() {
         if (category == "(Select)")
             category = "";
     }
+    var existingCategory = document.querySelector("option[value=\""+category+"\"]");
+    if (!existingCategory) {
+        document.querySelector("#existing-category-to-set").innerHTML += "<option value=\""+category+"\">"+category+"</option>";
+    }
     sendData("/today/calories", "amount="+amount+"&category="+category, function() {
         showTodaySection();
     });
@@ -153,7 +157,7 @@ function showAddEntrySection(dontSwitch) {
         var select = document.querySelector("#existing-category-to-set");
         select.innerHTML = "<option selected>(Select)</option>";
         for (var i = 0; i < categories.length; i++) {
-            select.innerHTML += "<option>"+categories[i]+"</option>";
+            select.innerHTML += "<option value=\""+categories[i]+"\">"+categories[i]+"</option>";
         }
         document.querySelector("#amount-to-set").value = 200;
         document.querySelector("#new-category-to-set").value = "";
