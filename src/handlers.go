@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+func currentUser(r *http.Request) string {
+	return r.Context().Value(authenticatedUser).(string)
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.NotFound(w, r)
@@ -26,66 +30,6 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(html)
 }
 
-func weightHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.NotFound(w, r)
-		return
-	}
-
-	formValue := r.FormValue("weight")
-	if formValue == "" {
-		http.Error(w, "bad request", 400)
-		return
-	}
-
-	val, err := strconv.ParseFloat(formValue, 32)
-	if err != nil {
-		http.Error(w, "bad request", 400)
-		return
-	}
-
-	rounded := math.Round(val*100) / 100
-
-	err = addWeightEntry(rounded)
-	if err != nil {
-		log.Println("ERROR: " + err.Error())
-		http.Error(w, "server error", 500)
-		return
-	}
-
-	w.WriteHeader(http.StatusAccepted)
-}
-
-func caloriesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.NotFound(w, r)
-		return
-	}
-
-	formValue := r.FormValue("amount")
-	if formValue == "" {
-		http.Error(w, "bad request", 400)
-		return
-	}
-
-	calories, err := strconv.Atoi(formValue)
-	if err != nil {
-		http.Error(w, "bad request", 400)
-		return
-	}
-
-	category := r.FormValue("category")
-
-	err = addCalorieEntry(int(calories), category)
-	if err != nil {
-		log.Println("ERROR: " + err.Error())
-		http.Error(w, "server error", 500)
-		return
-	}
-
-	w.WriteHeader(http.StatusAccepted)
-}
-
 func todayHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.NotFound(w, r)
@@ -93,8 +37,9 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	day := time.Now()
+	currentUser := currentUser(r)
 
-	weight, err := getDayWeight(day)
+	weight, err := getDayWeight(day, currentUser)
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)
@@ -103,7 +48,7 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 
 	var lastWeight float64
 	if weight == 0 {
-		lastWeight, err = getLatestWeight()
+		lastWeight, err = getLatestWeight(currentUser)
 		if err != nil {
 			log.Println("ERROR: " + err.Error())
 			http.Error(w, "server error", 500)
@@ -111,14 +56,14 @@ func todayHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	calories, err := getDayCalories(day)
+	calories, err := getDayCalories(day, currentUser)
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)
 		return
 	}
 
-	goals, err := getGoals()
+	goals, err := getGoals(currentUser)
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)
@@ -167,13 +112,73 @@ func calcTodayMax(goals goals, currentWeight float64) *int {
 	return &result
 }
 
+func weightHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+		return
+	}
+
+	formValue := r.FormValue("weight")
+	if formValue == "" {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	val, err := strconv.ParseFloat(formValue, 32)
+	if err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	rounded := math.Round(val*100) / 100
+
+	err = addWeightEntry(rounded, currentUser(r))
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
+func caloriesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+		return
+	}
+
+	formValue := r.FormValue("amount")
+	if formValue == "" {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	calories, err := strconv.Atoi(formValue)
+	if err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	category := r.FormValue("category")
+
+	err = addCalorieEntry(int(calories), category, currentUser(r))
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
 func categoriesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.NotFound(w, r)
 		return
 	}
 
-	categories, err := getCalorieCategories()
+	categories, err := getCalorieCategories(currentUser(r))
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)
@@ -238,11 +243,12 @@ func setGoalsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = setSetting("target_weight", weight)
+	currentUser := currentUser(r)
+	err = setSetting("target_weight", weight, currentUser)
 	if err == nil {
-		err = setSetting("target_date", date)
+		err = setSetting("target_date", date, currentUser)
 		if err == nil {
-			err = setSetting("daily_burn_rate", burnRate)
+			err = setSetting("daily_burn_rate", burnRate, currentUser)
 		}
 	}
 	if err != nil {
@@ -255,7 +261,7 @@ func setGoalsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getGoalsHandler(w http.ResponseWriter, r *http.Request) {
-	goals, err := getGoals()
+	goals, err := getGoals(currentUser(r))
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -16,12 +18,19 @@ type siteConfig struct {
 }
 
 var config = siteConfig{}
+var database *sql.DB
 
-var currentUser = ""
+var authenticatedUser = struct{}{}
 
 func main() {
 
 	loadConfig() // load settings from ./config.json and setup oauth config
+
+	db, err := sql.Open("sqlite3", config.DatabasePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	database = db
 
 	if len(os.Args) == 4 && os.Args[1] == "--create-user" {
 		err := insertOrUpdateUser(os.Args[2], os.Args[3])
@@ -75,7 +84,7 @@ func globalHandler(h http.Handler) http.Handler {
 			return
 		}
 
-		currentUser = user
+		userCtx := context.WithValue(r.Context(), authenticatedUser, user)
 
 		headers := w.Header()
 		headers.Set("X-Frame-Options", "SAMEORIGIN")
@@ -91,7 +100,7 @@ func globalHandler(h http.Handler) http.Handler {
 		csp += "frame-src 'self';"
 		headers.Set("Content-Security-Policy", csp)
 
-		h.ServeHTTP(w, r)
+		h.ServeHTTP(w, r.WithContext(userCtx))
 	})
 }
 

@@ -21,12 +21,6 @@ func insertOrUpdateUser(user, pass string) error {
 		return err
 	}
 
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return err
-	}
-
 	res, err := database.Exec("UPDATE users SET password = ? WHERE username = ?", passwordHash, user)
 
 	if err != nil {
@@ -42,16 +36,10 @@ func insertOrUpdateUser(user, pass string) error {
 }
 
 func testAuthAgainstDB(user, pass string) (bool, error) {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return false, err
-	}
-
 	var passwordHash string
 
 	row := database.QueryRow("SELECT password FROM users WHERE username = ?", user)
-	err = row.Scan(&passwordHash)
+	err := row.Scan(&passwordHash)
 
 	if err == sql.ErrNoRows {
 		return false, nil
@@ -62,14 +50,8 @@ func testAuthAgainstDB(user, pass string) (bool, error) {
 	}
 }
 
-func getSettings() (map[string]string, error) {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := database.Query("SELECT setting_key, setting_value FROM settings WHERE username = ?", currentUser)
+func getSettings(username string) (map[string]string, error) {
+	rows, err := database.Query("SELECT setting_key, setting_value FROM settings WHERE username = ?", username)
 	if err != nil {
 		return nil, err
 	}
@@ -87,14 +69,8 @@ func getSettings() (map[string]string, error) {
 	return result, nil
 }
 
-func setSetting(key, val string) error {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return err
-	}
-
-	res, err := database.Exec("UPDATE settings SET setting_value = ? WHERE setting_key = ? AND username = ?", val, key, currentUser)
+func setSetting(key, val, username string) error {
+	res, err := database.Exec("UPDATE settings SET setting_value = ? WHERE setting_key = ? AND username = ?", val, key, username)
 
 	if err != nil {
 		return err
@@ -104,7 +80,7 @@ func setSetting(key, val string) error {
 		return err
 	}
 
-	_, err = database.Exec("INSERT INTO settings (setting_key, setting_value, username) VALUES (?, ?, ?)", key, val, currentUser)
+	_, err = database.Exec("INSERT INTO settings (setting_key, setting_value, username) VALUES (?, ?, ?)", key, val, username)
 	return err
 }
 
@@ -114,8 +90,8 @@ type goals struct {
 	BurnRate     int
 }
 
-func getGoals() (*goals, error) {
-	settings, err := getSettings()
+func getGoals(username string) (*goals, error) {
+	settings, err := getSettings(username)
 	if err != nil {
 		return nil, err
 	}
@@ -143,27 +119,14 @@ func getGoals() (*goals, error) {
 	return &goals{targetWeight, date, burnRate}, nil
 }
 
-func addWeightEntry(val float64) error {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return err
-	}
-
+func addWeightEntry(val float64, username string) error {
 	date := time.Now().Format(time.RFC3339)
-
-	_, err = database.Exec("INSERT INTO weight_entry (date, weight, username) VALUES (?, ?, ?)", date, val, currentUser)
+	_, err := database.Exec("INSERT INTO weight_entry (date, weight, username) VALUES (?, ?, ?)", date, val, username)
 	return err
 }
 
-func getCalorieCategories() ([]string, error) {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := database.Query("SELECT DISTINCT category FROM calorie_entry WHERE username = ?", currentUser)
+func getCalorieCategories(username string) ([]string, error) {
+	rows, err := database.Query("SELECT DISTINCT category FROM calorie_entry WHERE username = ?", username)
 	if err != nil {
 		return nil, err
 	}
@@ -181,16 +144,9 @@ func getCalorieCategories() ([]string, error) {
 	return result, nil
 }
 
-func addCalorieEntry(amount int, category string) error {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return err
-	}
-
+func addCalorieEntry(amount int, category, username string) error {
 	date := time.Now().Format(time.RFC3339)
-
-	_, err = database.Exec("INSERT INTO calorie_entry (date, amount, category, username) VALUES (?, ?, ?, ?)", date, amount, category, currentUser)
+	_, err := database.Exec("INSERT INTO calorie_entry (date, amount, category, username) VALUES (?, ?, ?, ?)", date, amount, category, username)
 	return err
 }
 
@@ -200,18 +156,12 @@ func getDayStartAndEnd(day time.Time) (string, string) {
 	return start.Format(time.RFC3339), endParam
 }
 
-func getDayWeight(day time.Time) (float64, error) {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return 0, err
-	}
-
+func getDayWeight(day time.Time, username string) (float64, error) {
 	start, end := getDayStartAndEnd(day)
 	var todaysWeight float64
 
-	row := database.QueryRow("SELECT weight	FROM weight_entry WHERE	date >= ? AND date <= ?	AND username = ? ORDER BY date DESC	LIMIT 1", start, end, currentUser)
-	err = row.Scan(&todaysWeight)
+	row := database.QueryRow("SELECT weight	FROM weight_entry WHERE	date >= ? AND date <= ?	AND username = ? ORDER BY date DESC	LIMIT 1", start, end, username)
+	err := row.Scan(&todaysWeight)
 
 	if err == sql.ErrNoRows {
 		return 0, nil
@@ -222,17 +172,11 @@ func getDayWeight(day time.Time) (float64, error) {
 	}
 }
 
-func getLatestWeight() (float64, error) {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return 0, err
-	}
-
+func getLatestWeight(username string) (float64, error) {
 	var lastWeight float64
 
-	row := database.QueryRow("SELECT weight	FROM weight_entry WHERE username = ? ORDER BY date DESC LIMIT 1", currentUser)
-	err = row.Scan(&lastWeight)
+	row := database.QueryRow("SELECT weight	FROM weight_entry WHERE username = ? ORDER BY date DESC LIMIT 1", username)
+	err := row.Scan(&lastWeight)
 
 	if err == sql.ErrNoRows {
 		return 0, nil
@@ -248,16 +192,10 @@ type calorieEntry struct {
 	Category string
 }
 
-func getDayCalories(day time.Time) ([]calorieEntry, error) {
-	database, err := sql.Open("sqlite3", config.DatabasePath)
-	defer database.Close()
-	if err != nil {
-		return nil, err
-	}
-
+func getDayCalories(day time.Time, username string) ([]calorieEntry, error) {
 	start, end := getDayStartAndEnd(day)
 
-	rows, err := database.Query("SELECT amount, category FROM calorie_entry WHERE date >= ? AND date <= ? AND username = ?", start, end, currentUser)
+	rows, err := database.Query("SELECT amount, category FROM calorie_entry WHERE date >= ? AND date <= ? AND username = ?", start, end, username)
 	if err != nil {
 		return nil, err
 	}
