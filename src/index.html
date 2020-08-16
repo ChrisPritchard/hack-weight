@@ -12,11 +12,11 @@
             <div id="today-section" class="section hide">
                 <h1 id="today"></h1>
                 <h2 id="recorded-weight"></h2>
-                <button id="show-set-goals">Show Goals</button>
-                <button id="show-set-weight" class="hide">Set Weight</button>
+                <button id="show-set-goals" class="switch-section">Show Goals</button>
+                <button id="show-set-weight" class="hide switch-section">Set Weight</button>
                 <br /><br />
                 <div>
-                    <button id="show-add-calorie-entry">Add Something Consumed</button>
+                    <button id="show-add-calorie-entry" class="switch-section">Add Something Consumed</button>
                     <br /><br />
                     <span id="total-consumed"></span>
                     <ul id="today-entries"></ul>
@@ -26,6 +26,7 @@
             <div id="set-weight-section" class="section hide">
                 <h1>Enter Weight</h1>
                 <input id="weight-to-set" type="number" step="0.1" min="50" max="150" value="90" />
+                <br /><br />
                 <button id="set-weight">Submit</button>
                 <button class="cancel-button">Cancel</button>
             </div>

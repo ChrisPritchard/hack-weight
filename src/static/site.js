@@ -120,6 +120,7 @@ function showTodaySection() {
             weightText = (Math.round(today.Weight * 10)/10).toFixed(1)
             document.querySelector("#recorded-weight").innerText = "Today's Weight: "+weightText+" KG";
             document.querySelector("#current-weight").value = today.Weight;
+            document.querySelector("#weight-to-set").value = today.Weight;
         } else {
             document.querySelector("#show-set-weight").classList.remove("hide");
         }
@@ -131,6 +132,7 @@ function showTodaySection() {
 
         var totalConsumed = 0;
         var entries = document.querySelector("#today-entries");
+        entries.innerHTML = "";
         for(var i = 0; i < today.Calories.length; i++) {
             var entry = today.Calories[i];
             totalConsumed += entry.Amount;
@@ -146,7 +148,7 @@ function showTodaySection() {
     });
 }
 
-function showAddEntrySection() {
+function showAddEntrySection(dontSwitch) {
     getResponse("/categories", function(categories) {
         var select = document.querySelector("#existing-category-to-set");
         select.innerHTML = "<option selected>(Select)</option>";
@@ -156,11 +158,12 @@ function showAddEntrySection() {
         document.querySelector("#amount-to-set").value = 200;
         document.querySelector("#new-category-to-set").value = "";
 
-        changeSection("#add-calorie-entry-section");
+        if(!dontSwitch)
+            changeSection("#add-calorie-entry-section");
     });
 }
 
-function showGoalsSection() {
+function showGoalsSection(dontSwitch) {
     getResponse("/goals", function(goals) {
         if (goals.TargetWeight && goals.TargetWeight != 0) {
             document.querySelector("#target-weight").value = goals.TargetWeight;
@@ -174,8 +177,11 @@ function showGoalsSection() {
             document.querySelector("#daily-burn-rate").value = goals.BurnRate;
         }
 
-        changeSection("#set-goals-section");
+        if(!dontSwitch)
+            changeSection("#set-goals-section");
     });
 }
 
+showAddEntrySection(false);
+showGoalsSection(false);
 showTodaySection();

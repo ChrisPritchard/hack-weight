@@ -34,3 +34,32 @@ label input, label button, label select {
 #goals-description {
     font-weight: bold;
 }
+
+@media only screen and (min-device-width: 480px) {
+    body {
+        font-size: 1em;
+    }
+    button, input, select {
+        font-size: 1em;
+        padding: 0.2em;
+    }
+    label {
+        margin-bottom: 1em;
+    }
+    label input, label button, label select {
+        margin-top: 0.5em;
+    }
+    .hide {
+        display: block;
+    }
+    .section {
+        margin: 0.5em;
+        padding: 1em;
+        border: 1px solid white;
+        width: 250px;
+        float: left;
+    }
+    .switch-section, .cancel-button {
+        display: none;
+    }
+}
