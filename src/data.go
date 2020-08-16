@@ -52,6 +52,7 @@ func testAuthAgainstDB(user, pass string) (bool, error) {
 
 func getSettings(username string) (map[string]string, error) {
 	rows, err := database.Query("SELECT setting_key, setting_value FROM settings WHERE username = ?", username)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +72,6 @@ func getSettings(username string) (map[string]string, error) {
 
 func setSetting(key, val, username string) error {
 	res, err := database.Exec("UPDATE settings SET setting_value = ? WHERE setting_key = ? AND username = ?", val, key, username)
-
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,6 @@ func setSetting(key, val, username string) error {
 	if err != nil || rows == 1 {
 		return err
 	}
-
 	_, err = database.Exec("INSERT INTO settings (setting_key, setting_value, username) VALUES (?, ?, ?)", key, val, username)
 	return err
 }
@@ -127,6 +126,7 @@ func addWeightEntry(val float64, username string) error {
 
 func getCalorieCategories(username string) ([]string, error) {
 	rows, err := database.Query("SELECT DISTINCT category FROM calorie_entry WHERE username = ?", username)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -196,6 +196,7 @@ func getDayCalories(day time.Time, username string) ([]calorieEntry, error) {
 	start, end := getDayStartAndEnd(day)
 
 	rows, err := database.Query("SELECT amount, category FROM calorie_entry WHERE date >= ? AND date <= ? AND username = ?", start, end, username)
+	defer rows.Close()
 	if err != nil {
 		return nil, err
 	}
