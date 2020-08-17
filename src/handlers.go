@@ -132,7 +132,7 @@ func weightHandler(w http.ResponseWriter, r *http.Request) {
 
 	rounded := math.Round(val*100) / 100
 
-	err = addWeightEntry(rounded, currentUser(r))
+	err = addWeightEntry(time.Now(), rounded, currentUser(r))
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)
@@ -162,7 +162,7 @@ func caloriesHandler(w http.ResponseWriter, r *http.Request) {
 
 	category := r.FormValue("category")
 
-	err = addCalorieEntry(int(calories), category, currentUser(r))
+	err = addCalorieEntry(time.Now(), int(calories), category, currentUser(r))
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		http.Error(w, "server error", 500)

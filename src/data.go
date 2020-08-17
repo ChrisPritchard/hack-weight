@@ -119,8 +119,8 @@ func getGoals(username string) (*goals, error) {
 	return &goals{targetWeight, date, burnRate}, nil
 }
 
-func addWeightEntry(val float64, username string) error {
-	date := time.Now().Format(time.RFC3339)
+func addWeightEntry(day time.Time, val float64, username string) error {
+	date := day.Format(time.RFC3339)
 	_, err := database.Exec("INSERT INTO weight_entry (date, weight, username) VALUES (?, ?, ?)", date, val, username)
 	return err
 }
@@ -145,8 +145,8 @@ func getCalorieCategories(username string) ([]string, error) {
 	return result, nil
 }
 
-func addCalorieEntry(amount int, category, username string) error {
-	date := time.Now().Format(time.RFC3339)
+func addCalorieEntry(day time.Time, amount int, category, username string) error {
+	date := day.Format(time.RFC3339)
 	_, err := database.Exec("INSERT INTO calorie_entry (date, amount, category, username) VALUES (?, ?, ?, ?)", date, amount, category, username)
 	return err
 }
