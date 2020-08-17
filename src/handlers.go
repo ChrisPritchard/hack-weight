@@ -308,11 +308,19 @@ func getGoalsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func historyHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
+	if r.Method == "GET" {
+		getHistoryHandler(w, r)
+		return
+	} else if r.Method == "POST" {
+		setHistoryHandler(w, r)
+		return
+	} else {
 		http.NotFound(w, r)
 		return
 	}
+}
 
+func getHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := allDaysForUser(currentUser(r))
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
@@ -332,6 +340,16 @@ func historyHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+func setHistoryHandler(w http.ResponseWriter, r *http.Request) {
+
+	// get all body content
+	// split by line
+	// interpret first line as headers
+	// alternatively scanf on fixed format?
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func clearAllEntriesHandler(w http.ResponseWriter, r *http.Request) {
