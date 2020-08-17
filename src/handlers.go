@@ -172,6 +172,34 @@ func caloriesHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
+func deleteEntryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+		return
+	}
+
+	formValue := r.FormValue("id")
+	if formValue == "" {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	id, err := strconv.Atoi(formValue)
+	if err != nil {
+		http.Error(w, "bad request", 400)
+		return
+	}
+
+	err = deleteCalorieEntry(id, currentUser(r))
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
 func categoriesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.NotFound(w, r)

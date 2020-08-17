@@ -110,6 +110,7 @@ func setupRoutes() {
 
 	http.HandleFunc("/today/weight", weightHandler)
 	http.HandleFunc("/today/calories", caloriesHandler)
+	http.HandleFunc("/calories/delete", deleteEntryHandler)
 	http.HandleFunc("/today", todayHandler)
 	http.HandleFunc("/categories", categoriesHandler)
 	http.HandleFunc("/goals", goalsHandler)

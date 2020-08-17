@@ -150,6 +150,11 @@ func addCalorieEntry(amount int, category, username string) error {
 	return err
 }
 
+func deleteCalorieEntry(id int, username string) error {
+	_, err := database.Exec("DELETE FROM calorie_entry WHERE Id = ? AND username = ?", id, username)
+	return err
+}
+
 func getDayStartAndEnd(day time.Time) (string, string) {
 	y, m, d := day.Date()
 	start := time.Date(y, m, d, 0, 0, 0, 0, day.Location())
@@ -189,6 +194,7 @@ func getLatestWeight(username string) (float64, error) {
 }
 
 type calorieEntry struct {
+	ID       int
 	Amount   int
 	Category string
 }
@@ -196,7 +202,7 @@ type calorieEntry struct {
 func getDayCalories(day time.Time, username string) ([]calorieEntry, error) {
 	start, end := getDayStartAndEnd(day)
 
-	rows, err := database.Query("SELECT amount, category FROM calorie_entry WHERE date >= ? AND date <= ? AND username = ?", start, end, username)
+	rows, err := database.Query("SELECT id, amount, category FROM calorie_entry WHERE date >= ? AND date <= ? AND username = ?", start, end, username)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
@@ -205,7 +211,7 @@ func getDayCalories(day time.Time, username string) ([]calorieEntry, error) {
 	result := make([]calorieEntry, 0)
 	for rows.Next() {
 		var row calorieEntry
-		err = rows.Scan(&row.Amount, &row.Category)
+		err = rows.Scan(&row.ID, &row.Amount, &row.Category)
 		if err != nil {
 			return nil, err
 		}

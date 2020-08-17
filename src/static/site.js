@@ -153,9 +153,25 @@ function showTodaySection() {
         for(var i = 0; i < today.Calories.length; i++) {
             var entry = today.Calories[i];
             totalConsumed += entry.Amount;
-            entries.innerHTML += "<li>"+entry.Amount+" Cal - "+entry.Category+"</li>";
+            var htmlToAdd = "<tr><td>"+entry.Amount+" Cal</td>"
+            htmlToAdd += "<td>"+entry.Category+"</td>"
+            htmlToAdd += "<td><button data-delete=\""+entry.ID+"\">X</button></td></tr>"
+            entries.innerHTML += htmlToAdd;
         }
         document.querySelector("#total-consumed").innerText = "Consumed Today: "+totalConsumed+" Cal";
+
+        var deletables = document.querySelectorAll("[data-delete]");
+        for (var i = 0; i < deletables.length; i++) {
+            deletables[i].addEventListener("click", function(e) {
+                if (!confirm("Are you sure?"))
+                    return;
+                var id = e.target.getAttribute("data-delete");
+                sendData("/calories/delete", "id="+id, function() {
+                    showAddEntrySection(true);
+                    showTodaySection();
+                })
+            })
+        }
 
         if (today.TodayMax && today.TodayMax > 0) {
             document.querySelector("#total-consumed").innerText += " / " + today.TodayMax + " Cal";
