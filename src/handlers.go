@@ -307,6 +307,33 @@ func getGoalsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func historyHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.NotFound(w, r)
+		return
+	}
+
+	result, err := allDaysForUser(currentUser(r))
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	contentType := r.Header.Get("Content-type")
+	if contentType == "application/json" {
+		w.Header().Set("Content-Type", contentType)
+		json.NewEncoder(w).Encode(result)
+	} else {
+		for _, day := range result {
+			fmt.Fprintf(w, "%s %f\n", day.date, day.weight)
+			for _, entry := range day.entries {
+				fmt.Fprintf(w, "%d\t%s\n", entry.Amount, entry.Category)
+			}
+		}
+	}
+}
+
 func clearAllEntriesHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.NotFound(w, r)

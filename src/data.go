@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"sort"
 	"strconv"
 	"time"
 
@@ -235,4 +236,85 @@ func clearAllEntries(username string) error {
 		return err
 	}
 	return nil
+}
+
+type recordedDay struct {
+	date    string
+	weight  float64
+	entries []calorieEntry
+	total   int
+}
+
+func allDaysForUser(username string) ([]recordedDay, error) {
+	weightRows, err := database.Query("SELECT weight, date FROM weight_entry WHERE username = ? ORDER BY date", username)
+	defer weightRows.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	days := make(map[string]recordedDay)
+	for weightRows.Next() {
+		var weight float64
+		var date string
+		err = weightRows.Scan(&weight, &date)
+		if err != nil {
+			return nil, err
+		}
+
+		dateVal, err := time.Parse(time.RFC3339, date)
+		if err != nil {
+			return nil, err
+		}
+
+		start, _ := getDayStartAndEnd(dateVal)
+		days[start] = recordedDay{start, weight, []calorieEntry{}, 0}
+	}
+
+	caloryRows, err := database.Query("SELECT id, amount, category, date FROM calorie_entry WHERE username = ? ORDER BY date", username)
+	defer caloryRows.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	for caloryRows.Next() {
+		var id int
+		var amount int
+		var category, date string
+		err = caloryRows.Scan(&id, &amount, &category, &date)
+		if err != nil {
+			return nil, err
+		}
+
+		dateVal, err := time.Parse(time.RFC3339, date)
+		if err != nil {
+			return nil, err
+		}
+
+		start, _ := getDayStartAndEnd(dateVal)
+		entry, exists := days[start]
+		if !exists {
+			continue
+		}
+		entry.entries = append(entry.entries, calorieEntry{id, amount, category})
+		days[start] = entry
+	}
+
+	return sortMap(days), nil
+}
+
+func sortMap(m map[string]recordedDay) []recordedDay {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	result := make([]recordedDay, len(m))
+	j := 0
+	for _, k := range keys {
+		result[j] = m[k]
+		j++
+	}
+	return result
 }
