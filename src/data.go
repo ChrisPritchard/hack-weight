@@ -246,6 +246,18 @@ type recordedDay struct {
 }
 
 func allDaysForUser(username string) ([]recordedDay, error) {
+
+	days, err := createDaysFromWeights(username)
+	if err != nil {
+		return nil, err
+	}
+
+	days, err = appendEntriesToDays(username, days)
+
+	return sortDays(days), nil
+}
+
+func createDaysFromWeights(username string) (map[string]recordedDay, error) {
 	weightRows, err := database.Query("SELECT weight, date FROM weight_entry WHERE username = ? ORDER BY date", username)
 	defer weightRows.Close()
 	if err != nil {
@@ -270,6 +282,10 @@ func allDaysForUser(username string) ([]recordedDay, error) {
 		days[start] = recordedDay{start, weight, []calorieEntry{}, 0}
 	}
 
+	return days, nil
+}
+
+func appendEntriesToDays(username string, days map[string]recordedDay) (map[string]recordedDay, error) {
 	caloryRows, err := database.Query("SELECT id, amount, category, date FROM calorie_entry WHERE username = ? ORDER BY date", username)
 	defer caloryRows.Close()
 	if err != nil {
@@ -299,21 +315,21 @@ func allDaysForUser(username string) ([]recordedDay, error) {
 		days[start] = entry
 	}
 
-	return sortMap(days), nil
+	return days, nil
 }
 
-func sortMap(m map[string]recordedDay) []recordedDay {
-	keys := make([]string, len(m))
+func sortDays(days map[string]recordedDay) []recordedDay {
+	keys := make([]string, len(days))
 	i := 0
-	for k := range m {
+	for k := range days {
 		keys[i] = k
 		i++
 	}
 	sort.Strings(keys)
-	result := make([]recordedDay, len(m))
+	result := make([]recordedDay, len(days))
 	j := 0
 	for _, k := range keys {
-		result[j] = m[k]
+		result[j] = days[k]
 		j++
 	}
 	return result
