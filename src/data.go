@@ -151,7 +151,8 @@ func addCalorieEntry(amount int, category, username string) error {
 }
 
 func getDayStartAndEnd(day time.Time) (string, string) {
-	start := day.Truncate(24 * time.Hour)
+	y, m, d := day.Date()
+	start := time.Date(y, m, d, 0, 0, 0, 0, day.Location())
 	endParam := start.Add(24 * time.Hour).Format(time.RFC3339)
 	return start.Format(time.RFC3339), endParam
 }
