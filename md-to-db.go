@@ -23,6 +23,8 @@ import (
 
 func main() {
 	log.SetFlags(0)
+	log.SetOutput(os.Stdout)
+
 	if len(os.Args) != 3 {
 		log.Println("two args required: [username] [path to md file]")
 		return
