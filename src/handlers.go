@@ -308,19 +308,11 @@ func getGoalsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func historyHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
-		getHistoryHandler(w, r)
-		return
-	} else if r.Method == "POST" {
-		setHistoryHandler(w, r)
-		return
-	} else {
+	if r.Method != "GET" {
 		http.NotFound(w, r)
 		return
 	}
-}
 
-func getHistoryHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := allDaysForUser(currentUser(r))
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
