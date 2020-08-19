@@ -334,14 +334,63 @@ func historyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func setHistoryHandler(w http.ResponseWriter, r *http.Request) {
+type trendModel struct {
+	lastTwoWeeks      []recordedDay
+	trend             float64
+	averageCalsPerDay float64
+}
 
-	// get all body content
-	// split by line
-	// interpret first line as headers
-	// alternatively scanf on fixed format?
+func trendHandler(w http.ResponseWriter, r *http.Request) {
 
-	w.WriteHeader(http.StatusAccepted)
+	allEntries, err := allDaysForUser(currentUser(r))
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+		http.Error(w, "server error", 500)
+		return
+	}
+
+	var lastTwoWeeks []recordedDay
+	if len(allEntries) == 0 {
+		writeTrendResponse(w, r, []recordedDay{}, 0, 0)
+		return
+	} else if len(allEntries) < 14 {
+		lastTwoWeeks = allEntries
+	} else {
+		lastTwoWeeks = allEntries[len(allEntries)-14:]
+	}
+
+	trend := (lastTwoWeeks[len(lastTwoWeeks)-1].weight - lastTwoWeeks[0].weight) / float64(len(lastTwoWeeks))
+	trend = math.Round(trend*100) / 100
+
+	var totalCals float64
+	for _, day := range lastTwoWeeks {
+		for _, entry := range day.entries {
+			totalCals += float64(entry.Amount)
+		}
+	}
+
+	averageCalsPerDay := totalCals / float64(len(lastTwoWeeks))
+	averageCalsPerDay = math.Round(averageCalsPerDay*100) / 100
+
+	writeTrendResponse(w, r, lastTwoWeeks, trend, averageCalsPerDay)
+}
+
+func writeTrendResponse(w http.ResponseWriter, r *http.Request, lastTwoWeeks []recordedDay, trend, averageCalsPerDay float64) {
+	result := trendModel{lastTwoWeeks, trend, averageCalsPerDay}
+	contentType := r.Header.Get("Content-type")
+	if contentType == "application/json" {
+		w.Header().Set("Content-Type", contentType)
+		json.NewEncoder(w).Encode(result)
+	} else {
+		fmt.Fprintln(w, result.trend)
+		fmt.Fprintln(w, result.averageCalsPerDay)
+		for _, day := range result.lastTwoWeeks {
+			fmt.Fprintf(w, "%s %f\n", day.date, day.weight)
+			for _, entry := range day.entries {
+				fmt.Fprintf(w, "%d\t%s\n", entry.Amount, entry.Category)
+			}
+		}
+	}
 }
 
 func clearAllEntriesHandler(w http.ResponseWriter, r *http.Request) {

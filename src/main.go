@@ -115,6 +115,7 @@ func setupRoutes() {
 	http.HandleFunc("/categories", categoriesHandler)
 	http.HandleFunc("/goals", goalsHandler)
 	http.HandleFunc("/history", historyHandler)
+	http.HandleFunc("/history/trend", trendHandler)
 	http.HandleFunc("/history/clear", clearAllEntriesHandler)
 }
 
