@@ -6,6 +6,39 @@
         <link rel="stylesheet" href="/static/site.css" />
     </head>
     <body>
+        
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <div style="width: 800px; height: 400px">
+        <canvas id="myChart"></canvas></div>
+        <script>
+        var ctx = document.getElementById('myChart').getContext('2d');
+        Chart.defaults.global.defaultFontColor = '#fff';
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange','Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange','Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange','Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange','Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange','Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange','Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange','Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                datasets: [{
+                    label: 'Recorded',
+                    data: [12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3],
+                    borderColor: [
+                        '#fff'
+                    ],
+                    borderWidth: 1,
+                    fill: false
+                },
+                {
+                    label: 'Weighted 2 wk average',
+                    data: [5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 3,12, 19, 3],
+                    borderColor: [
+                        '#0f0'
+                    ],
+                    borderWidth: 1,
+                    fill: false
+                }]
+            }
+        });
+        </script>
+
 
         <div class="container">
 
