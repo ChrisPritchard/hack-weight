@@ -335,9 +335,9 @@ func historyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 type trendEntry struct {
-	date     string
-	recorded float64
-	weighted float64
+	Date     string
+	Recorded float64
+	Weighted float64
 }
 
 func trendHandler(w http.ResponseWriter, r *http.Request) {
@@ -353,7 +353,7 @@ func trendHandler(w http.ResponseWriter, r *http.Request) {
 	var lastTwoWeeks []float64
 
 	for _, day := range allEntries {
-		entry := trendEntry{day.date, day.weight, 0.0}
+		entry := trendEntry{day.date[:10], day.weight, 0.0}
 		if len(lastTwoWeeks) == 14 {
 			lastTwoWeeks = append(lastTwoWeeks[1:], day.weight)
 		} else {
@@ -363,7 +363,7 @@ func trendHandler(w http.ResponseWriter, r *http.Request) {
 		for _, weight := range lastTwoWeeks {
 			sum += weight
 		}
-		entry.weighted = math.Round((sum/float64(len(lastTwoWeeks)))*100) / 100
+		entry.Weighted = math.Round((sum/float64(len(lastTwoWeeks)))*100) / 100
 		result = append(result, entry)
 	}
 
@@ -373,7 +373,7 @@ func trendHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(result)
 	} else {
 		for _, entry := range result {
-			fmt.Fprintf(w, "%s\n%f\n%f\n\n", entry.date, entry.recorded, entry.weighted)
+			fmt.Fprintf(w, "%s\n%f\n%f\n\n", entry.Date, entry.Recorded, entry.Weighted)
 		}
 	}
 }

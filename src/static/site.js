@@ -215,21 +215,46 @@ function showGoalsSection(dontSwitch) {
     });
 }
 
-function drawGraph(xpos, ypos, width, height, title, xaxis, yaxis, data) {
-    // xaxis is title, type
-    // yaxis is title, type
-    // data is title, colour, points, and points are x, y, val
-
-    // 1. draw title
-    // 2. draw y axis
-    // 3. draw y axis title
-    // 4. draw x axis
-    // 5. draw x axis title
-    // ...
-
-    // is this a good idea? maybe just use a library
-}
-
 showAddEntrySection(false);
 showGoalsSection(false);
 showTodaySection();
+
+getResponse('/history/trend', function(result) {
+    
+    labels = [];
+    recorded = [];
+    weighted = [];
+    for (var i = 0; i < result.length; i++) {
+        labels.push(result[i].Date);
+        recorded.push(result[i].Recorded);
+        weighted.push(result[i].Weighted);
+    }
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    Chart.defaults.global.defaultFontColor = '#fff';
+
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Recorded',
+                data: recorded,
+                borderColor: [
+                    '#fff'
+                ],
+                borderWidth: 1,
+                fill: false
+            },
+            {
+                label: 'Weighted 2 wk average',
+                data: weighted,
+                borderColor: [
+                    '#0f0'
+                ],
+                borderWidth: 1,
+                fill: false
+            }]
+        }
+    });
+});

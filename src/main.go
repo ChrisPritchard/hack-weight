@@ -92,11 +92,11 @@ func globalHandler(h http.Handler) http.Handler {
 		headers.Set("X-Content-Type-Options", "nosniff")
 
 		csp := "default-src 'none';"
-		csp += "script-src 'self' 'unsafe-inline' https://use.fontawesome.com https://cdn.jsdelivr.net/npm/chart.js@2.8.0;"
+		csp += "script-src 'self' https://use.fontawesome.com https://cdn.jsdelivr.net/npm/chart.js@2.8.0;"
 		csp += "style-src 'self' 'unsafe-inline' https://use.fontawesome.com;"
 		csp += "font-src 'self' https://use.fontawesome.com;"
 		csp += "connect-src 'self';"
-		csp += "img-src 'self';"
+		csp += "img-src 'self' 'unsafe-inline';"
 		csp += "frame-src 'self';"
 		headers.Set("Content-Security-Policy", csp)
 
