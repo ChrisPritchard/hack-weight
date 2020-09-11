@@ -231,10 +231,10 @@ function showTrendSection(dontSwitch) {
             weighted.push(result[i].Weighted);
         }
     
-        var ctx = document.querySelector("#chart-canvas").getContext('2d');
+        var chartContext = document.querySelector("#chart-canvas").getContext('2d');
         Chart.defaults.global.defaultFontColor = '#fff';
     
-        new Chart(ctx, {
+        new Chart(chartContext, {
             type: 'line',
             data: {
                 labels: labels,
@@ -258,6 +258,33 @@ function showTrendSection(dontSwitch) {
                 }]
             }
         });
+
+        var arrowContext = document.querySelector("#arrow-canvas").getContext('2d');
+        var angle = 90;
+        var colour = "yellow";
+        if (weighted.length > 2) {
+            var diff = weighted[weighted.length - 1] - weighted[weighted.length - 2];
+            if (diff <= -1) {
+                angle = 180;
+                colour = "green";
+            } else if (diff < 0) {
+                angle = 90 + (Math.abs(diff)*90);
+                colour = "green";
+            } else if (diff >= 1) {
+                angle = 0;
+                colour = "orange";
+            } else {
+                angle = Math.abs(diff)*90;
+                colour = "orange";
+            }
+        }
+
+        // draw line process
+        // set stroke width to 2 and colour
+        // start at centre of canvas
+        // go back for 1/4 at reverse angle
+        // draw line for 1/4 at angle
+        // draw two point lines at 1/6 increase and decrease of leaf lines
 
         if(!dontSwitch)
             changeSection("#trend-section");

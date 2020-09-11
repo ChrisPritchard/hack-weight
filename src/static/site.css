@@ -39,14 +39,19 @@ table.entries-table td {
     padding-right: 1em;
 }
 
-div.chart-container {
-    width: 800px;
+.chart-container {
+    display: none; /*trend only in desktop view*/
+}
+
+.arrow-container {
+    width: 400px;
     height: 400px;
 }
 
 @media only screen and (min-device-width: 480px) {
     body {
         font-size: 1em;
+        overflow-x: auto;
     }
     button, input, select {
         font-size: 1em;
@@ -68,8 +73,10 @@ div.chart-container {
         width: 250px;
         float: left;
     }
-    #trend-section {
+    .chart-container {
+        display: block; /*trend only in desktop view*/
         width: 800px;
+        height: 400px;
     }
     .switch-section, .cancel-button {
         display: none;
