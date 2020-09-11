@@ -44,8 +44,10 @@ table.entries-table td {
 }
 
 .arrow-container {
-    width: 400px;
-    height: 400px;
+    border: 10px solid white;
+    width: 200px; 
+    height: 200px;
+    border-radius: 50%;
 }
 
 @media only screen and (min-device-width: 480px) {
@@ -72,6 +74,9 @@ table.entries-table td {
         border: 1px solid white;
         width: 250px;
         float: left;
+    }
+    #trend-section {
+        width: 800px;
     }
     .chart-container {
         display: block; /*trend only in desktop view*/

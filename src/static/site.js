@@ -259,32 +259,56 @@ function showTrendSection(dontSwitch) {
             }
         });
 
-        var arrowContext = document.querySelector("#arrow-canvas").getContext('2d');
-        var angle = 90;
+        // calculate trend arrow
+
+        var angle = 0;
         var colour = "yellow";
         if (weighted.length > 2) {
             var diff = weighted[weighted.length - 1] - weighted[weighted.length - 2];
             if (diff <= -1) {
-                angle = 180;
-                colour = "green";
+                angle = 90;
+                colour = "#0F0";
             } else if (diff < 0) {
-                angle = 90 + (Math.abs(diff)*90);
-                colour = "green";
-            } else if (diff >= 1) {
-                angle = 0;
-                colour = "orange";
-            } else {
                 angle = Math.abs(diff)*90;
-                colour = "orange";
+                colour = "#0F0";
+            } else if (diff >= 1) {
+                angle = 360-90;
+                colour = "yellow";
+            } else {
+                angle = 360-(Math.abs(diff)*90);
+                colour = "yellow";
             }
         }
 
-        // draw line process
-        // set stroke width to 2 and colour
-        // start at centre of canvas
-        // go back for 1/4 at reverse angle
-        // draw line for 1/4 at angle
-        // draw two point lines at 1/6 increase and decrease of leaf lines
+        var arrowContext = document.querySelector("#arrow-canvas").getContext('2d');
+        arrowContext.lineWidth = 10;
+        arrowContext.lineCap = "round";
+        arrowContext.strokeStyle = colour;
+
+        function drawLine(start, end) {
+            arrowContext.beginPath();
+            arrowContext.moveTo(start.x, start.y);
+            arrowContext.lineTo(end.x, end.y);
+            arrowContext.stroke();
+        }
+
+        var cw = arrowContext.canvas.width,
+            ch = arrowContext.canvas.height;
+        centre = { x: cw/2, y: ch/2 };
+
+        function getEnd(angle, length, start) {
+            angle = angle * (Math.PI/180);
+            return {
+                x: start.x + Math.cos(angle)*length,
+                y: start.y + Math.sin(angle)*length
+            }
+        }
+
+        drawLine(centre, getEnd(angle-180, cw/3, centre));
+        var point = getEnd(angle, cw/3, centre)
+        drawLine(centre, point);
+        drawLine(point, getEnd(angle-210, cw/3, point));
+        drawLine(point, getEnd(angle-150, cw/3, point));
 
         if(!dontSwitch)
             changeSection("#trend-section");
