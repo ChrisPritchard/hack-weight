@@ -7,10 +7,6 @@
     </head>
     <body>
         
-        <div style="width: 800px; height: 400px">
-            <canvas id="myChart"></canvas>
-        </div>
-
         <div class="container">
 
             <div id="today-section" class="section hide">
@@ -79,6 +75,12 @@
                 <button id="clear-history">Clear History</button>
                 <button id="set-goals" disabled>Submit</button>
                 <button class="cancel-button">Cancel</button>
+            </div>
+
+            <div id="trend-section" class="section hide">
+                <div class="chart-container">
+                    <canvas id="chart-canvas"></canvas>
+                </div>
             </div>
 
         </div>
