@@ -35,7 +35,7 @@ document.querySelector("#show-set-weight").addEventListener("click", function() 
 });
 
 document.querySelector("#show-trends").addEventListener("click", function() {
-    changeSection("#trend-section");
+    showTrendSection();
 });
 
 document.querySelector("#show-set-goals").addEventListener("click", function() {
@@ -287,10 +287,28 @@ function showTrendSection(dontSwitch) {
             }
         }
 
+        // if in mobile view use vw, else fixed size...
+        // draw from container, but container is 
+
         var arrowContext = document.querySelector("#arrow-canvas").getContext('2d');
-        arrowContext.lineWidth = 10;
+        var container = document.querySelector(".arrow-container");
+
+        dim = container.clientWidth;
+        dimLine = 10;
+        var isMobile = screen.width < 480;
+        if (isMobile) {
+            dim = window.innerWidth*0.8;
+            dimLine = window.innerWidth*0.05;
+        }
+
+        arrowContext.canvas.height = dim;
+        arrowContext.canvas.width = dim;
+
+        centre = { x: dim/2, y: dim/2 };
+
         arrowContext.lineCap = "round";
         arrowContext.strokeStyle = colour;
+        arrowContext.lineWidth = dimLine;
 
         function drawLine(start, end) {
             arrowContext.beginPath();
@@ -298,10 +316,6 @@ function showTrendSection(dontSwitch) {
             arrowContext.lineTo(end.x, end.y);
             arrowContext.stroke();
         }
-
-        var cw = arrowContext.canvas.width,
-            ch = arrowContext.canvas.height;
-        centre = { x: cw/2, y: ch/2 };
 
         function getEnd(angle, length, start) {
             angle = angle * (Math.PI/180);
@@ -311,11 +325,11 @@ function showTrendSection(dontSwitch) {
             }
         }
 
-        drawLine(centre, getEnd(angle-180, cw/3, centre));
-        var point = getEnd(angle, cw/3, centre)
+        drawLine(centre, getEnd(angle-180, dim/3, centre));
+        var point = getEnd(angle, dim/3, centre)
         drawLine(centre, point);
-        drawLine(point, getEnd(angle-210, cw/3, point));
-        drawLine(point, getEnd(angle-150, cw/3, point));
+        drawLine(point, getEnd(angle-210, dim/3, point));
+        drawLine(point, getEnd(angle-150, dim/3, point));
 
         if(!dontSwitch)
             changeSection("#trend-section");
@@ -325,4 +339,7 @@ function showTrendSection(dontSwitch) {
 showAddEntrySection(true);
 showGoalsSection(true);
 showTrendSection(true);
+window.addEventListener("resize", function() {
+    showTrendSection(true);
+});
 showTodaySection();

@@ -44,9 +44,11 @@ table.entries-table td {
 }
 
 .arrow-container {
-    border: 10px solid white;
-    width: 200px; 
-    height: 200px;
+    border: 5vw solid white;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80vw;
+    height: 80vw;
     border-radius: 50%;
 }
 
@@ -75,6 +77,9 @@ table.entries-table td {
         width: 250px;
         float: left;
     }
+    .no-chart {
+        display: none;
+    }
     #trend-section {
         width: 800px;
     }
@@ -82,6 +87,13 @@ table.entries-table td {
         display: block; /*trend only in desktop view*/
         width: 800px;
         height: 400px;
+    }
+    .arrow-container {
+        border: 10px solid white;
+        width: 200px;
+        height: 200px;
+        margin-left: 0;
+        border-radius: 50%;
     }
     .switch-section, .cancel-button {
         display: none;
