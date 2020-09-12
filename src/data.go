@@ -239,10 +239,10 @@ func clearAllEntries(username string) error {
 }
 
 type recordedDay struct {
-	date    string
-	weight  float64
-	entries []calorieEntry
-	total   int
+	Date    string
+	Weight  float64
+	Entries []calorieEntry
+	Total   int
 }
 
 func allDaysForUser(username string) ([]recordedDay, error) {
@@ -311,7 +311,7 @@ func appendEntriesToDays(username string, days map[string]recordedDay) (map[stri
 		if !exists {
 			continue
 		}
-		entry.entries = append(entry.entries, calorieEntry{id, amount, category})
+		entry.Entries = append(entry.Entries, calorieEntry{id, amount, category})
 		days[start] = entry
 	}
 

@@ -84,6 +84,13 @@ document.querySelector("#clear-history").addEventListener("click", function() {
     }
 });
 
+document.querySelector(".download-data-text").addEventListener("click", function() {
+    window.location.href = "/history?asfile=text";
+});
+document.querySelector(".download-data-json").addEventListener("click", function() {
+    window.location.href = "/history?asfile=json";
+});
+
 function calculateRates() {
     document.querySelector("#goals-description").value = "";
     document.querySelector("#set-goals").setAttribute("disabled", "disabled");

@@ -320,14 +320,22 @@ func historyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	asFile := r.FormValue("asfile")
+
 	contentType := r.Header.Get("Content-type")
-	if contentType == "application/json" {
+	if contentType == "application/json" || asFile == "json" {
+		if asFile != "" {
+			w.Header().Set("Content-disposition", ": attachment; filename=alldata.json")
+		}
 		w.Header().Set("Content-Type", contentType)
 		json.NewEncoder(w).Encode(result)
 	} else {
+		if asFile != "" {
+			w.Header().Set("Content-disposition", ": attachment; filename=alldata.txt")
+		}
 		for _, day := range result {
-			fmt.Fprintf(w, "%s %f\n", day.date, day.weight)
-			for _, entry := range day.entries {
+			fmt.Fprintf(w, "%s %f\n", day.Date, day.Weight)
+			for _, entry := range day.Entries {
 				fmt.Fprintf(w, "%d\t%s\n", entry.Amount, entry.Category)
 			}
 		}
@@ -353,11 +361,11 @@ func trendHandler(w http.ResponseWriter, r *http.Request) {
 	var lastTwoWeeks []float64
 
 	for _, day := range allEntries {
-		entry := trendEntry{day.date[:10], day.weight, 0.0}
+		entry := trendEntry{day.Date[:10], day.Weight, 0.0}
 		if len(lastTwoWeeks) == 14 {
-			lastTwoWeeks = append(lastTwoWeeks[1:], day.weight)
+			lastTwoWeeks = append(lastTwoWeeks[1:], day.Weight)
 		} else {
-			lastTwoWeeks = append(lastTwoWeeks, day.weight)
+			lastTwoWeeks = append(lastTwoWeeks, day.Weight)
 		}
 		sum := 0.0
 		for _, weight := range lastTwoWeeks {
